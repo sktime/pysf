@@ -1,9 +1,9 @@
 
 
-from .logger import LoggingHandler 
-from .data import MultiSeries
-from .errors import RawResiduals, ErrorCurve
-from .transformers.framework import AbstractTransformer
+from ..logger import LoggingHandler 
+from ..data import MultiSeries
+from ..errors import RawResiduals, ErrorCurve
+from ..transformers.framework import AbstractTransformer
 
 import numpy as np
 from abc import ABC, abstractmethod

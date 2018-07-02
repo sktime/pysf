@@ -94,8 +94,8 @@ if save_images:
 ############################################################################
 
 
-from multipred.predictors.framework import PipelinePredictor, MultiCurveTabularPredictor
-from multipred.transformers.smoothing import SmoothingSplineTransformer
+from pysf.predictors.framework import PipelinePredictor, MultiCurveTabularPredictor
+from pysf.transformers.smoothing import SmoothingSplineTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -111,7 +111,7 @@ multiseries_smoothing_pcr_predictor.set_parameters({ 'pca__n_components' : 3 , '
 # We are fitting on the training set and predicting & scoring on the validation set
 ########################################################################################
 
-from multipred.errors import ErrorCurve
+from pysf.errors import ErrorCurve
 import numpy as np
 
 common_prediction_times = np.arange(301, 366)
@@ -186,7 +186,7 @@ if save_images:
 # we may choose to predict for both features concurrently. 
 ########################################################################################
     
-from multipred.predictors.tuning import TuningOverallPredictor
+from pysf.predictors.tuning import TuningOverallPredictor
 from sklearn.model_selection import ParameterSampler
 
 tuning_overall_multiseries_smoothing_pcr_predictor = TuningOverallPredictor(predictor_template=multiseries_smoothing_pcr_predictor, scoring_metric='rmse', scoring_feature_name='tempav'
@@ -268,8 +268,8 @@ if save_images:
 # Each target is defined by a predictor and the particular input and output fields to use.
 ########################################################################################
 
-from multipred.generalisation import GeneralisationPerformanceEvaluator
-from multipred.predictors.baselines import SeriesMeansPredictor, ZeroPredictor, TimestampMeansPredictor, SeriesLinearInterpolator
+from pysf.generalisation import GeneralisationPerformanceEvaluator
+from pysf.predictors.baselines import SeriesMeansPredictor, ZeroPredictor, TimestampMeansPredictor, SeriesLinearInterpolator
 
 evaluator_weather = GeneralisationPerformanceEvaluator(data=data_weather, prediction_times=common_prediction_times)
 

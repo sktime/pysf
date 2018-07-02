@@ -1,6 +1,8 @@
 
 from .framework import MultiCurveTabularPredictor
+
 from sklearn.ensemble import RandomForestRegressor
+
 
 # According to this Kaggle page https://www.kaggle.com/general/4092 we should be tuning the following params:
 #   1. the number of candidate features (m)

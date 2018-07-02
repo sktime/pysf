@@ -1,6 +1,6 @@
 
 
-from .logger import LoggingHandler 
+from ..logger import LoggingHandler 
 
 from abc import ABC, abstractmethod
 

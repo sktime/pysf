@@ -2,3 +2,4 @@
 pysf.egg-info/*
 *.log
 *.out
+__pycache__
