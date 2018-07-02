@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pysf",
-    version="0.0.1",
+    version="0.0.2",
     author="Ahmed Guecioueur",
     author_email="ucakaag@ucl.ac.uk",
     description="Supervised Forecasting",
@@ -13,6 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/ahmedgc/pysf",
     packages=setuptools.find_packages(),
+	license="MIT",
     classifiers=(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

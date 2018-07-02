@@ -343,12 +343,4 @@ class ErrorCurve(LoggingHandler):
         self.initLogger()
 
 
-##################################################
-# For testing
-##################################################
-
-
-# Old testing code removed.
-    
-    
-    
+        

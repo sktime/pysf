@@ -1,15 +1,10 @@
 
-
-from .logger import LoggingHandler 
-from .data import MultiSeries
 from .framework import SingleCurveSeriesPredictor
 
-import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 from sklearn.dummy import DummyRegressor
 
-#import copy
 
 class ArimaPredictor(SingleCurveSeriesPredictor):
     """The summary line for a class docstring should fit on one line.
@@ -147,114 +142,3 @@ class ArimaPredictor(SingleCurveSeriesPredictor):
   
         
         
-        
-##################################################
-# For testing
-##################################################
-    
-        
-if False:
-  
-    from pysf.data import load_ramsay_weather_data_dfs, load_ramsay_growth_data_dfs
-    from sklearn.model_selection import KFold
-    
-    # Data: weather
-    (weather_vs_times_df, weather_vs_series_df) = load_ramsay_weather_data_dfs()
-    data_weather = MultiSeries(data_vs_times_df=weather_vs_times_df, data_vs_series_df=weather_vs_series_df, time_colname='day_of_year', series_id_colnames='weather_station')
-    #data_weather.visualise()
-    
-    # Data: growth
-    (growth_vs_times_df, growth_vs_series_df) = load_ramsay_growth_data_dfs()
-    growth_vs_series_df['gender'] = growth_vs_series_df['gender'].astype('category')
-    growth_vs_series_df = pd.concat([growth_vs_series_df, pd.get_dummies(growth_vs_series_df['gender'])], axis=1)
-    data_growth = MultiSeries(data_vs_times_df=growth_vs_times_df, data_vs_series_df=growth_vs_series_df, time_colname='age', series_id_colnames=['gender', 'cohort_id'])
-    #data_growth.visualise()
-
-    
-    predictor = ArimaPredictor()
-    predictor.p=3
-    predictor.d=2
-    predictor.q=2
-    print(str(predictor))
-    
-    times = np.arange(301,366)
-    time_as_feature = False
-    endogenous_features = ['tempav']
-    #endogenous_features = ['tempav','precav']
-    predictor.fit(X=data_weather, input_time_feature=time_as_feature, prediction_times=times, prediction_features=endogenous_features, input_non_time_features=endogenous_features) 
-    scoring_results = predictor.score(X=data_weather, input_time_feature=time_as_feature, prediction_times=times, prediction_features=endogenous_features, input_non_time_features=endogenous_features)
-    
-    individual_result = scoring_results['tempav']
-    individual_result.Y_hat.visualise()
-    individual_result.err.visualise_per_timestamp('Errors for ARIMA on tempav')
-    
-    #############
-    
-    
-    predictor = ArimaPredictor()
-    predictor.p=50
-    predictor.d=0
-    predictor.q=1
-    print(str(predictor))
-    
-    
-    times = np.arange(301,366)
-    time_as_feature = False
-    endogenous_features = ['precav']
-    #endogenous_features = ['tempav','precav']
-    predictor.fit(X=data_weather, input_time_feature=time_as_feature, prediction_times=times, prediction_features=endogenous_features, input_non_time_features=endogenous_features) 
-    scoring_results = predictor.score(X=data_weather, input_time_feature=time_as_feature, prediction_times=times, prediction_features=endogenous_features, input_non_time_features=endogenous_features)
-    
-    individual_result = scoring_results['precav']
-    individual_result.Y_hat.visualise()
-    individual_result.err.visualise_per_timestamp('Errors for ARIMA on precav')
-     
-    
-
-if False:
-    
-    
-    ###############################
-    # Tuning example
-    ###############################
-    
-    from pysf.data import load_ramsay_weather_data_dfs, load_ramsay_growth_data_dfs
-    from pysf.predictors.tuning import TuningOverallPredictor
-    from sklearn.model_selection import ParameterGrid, ParameterSampler
-    from scipy.stats import randint # uniform discrete RV
-    from scipy.stats import uniform # uniform continuous RV
-        
-    # Data: weather
-    (weather_vs_times_df, weather_vs_series_df) = load_ramsay_weather_data_dfs()
-    data_weather = MultiSeries(data_vs_times_df=weather_vs_times_df, data_vs_series_df=weather_vs_series_df, time_colname='day_of_year', series_id_colnames='weather_station')
-    #data_weather.visualise()
-    
-    param_sampler = ParameterSampler(n_iter=3, param_distributions={
-                                       'p' : randint(low=1, high=50)
-                                     , 'd' : [0,1]
-                                     , 'q' : randint(low=1, high=50)
-                                    })
-    predictor = TuningOverallPredictor(predictor_template=ArimaPredictor(), parameter_iterator=param_sampler, scoring_metric='rmse', scoring_feature_name='precav')
-    
-    # Tune over all of the data
-    times = np.arange(301,366)
-    time_as_feature = False
-    endogenous_features = ['precav']
-    predictor.fit(X=data_weather, input_time_feature=time_as_feature, prediction_times=times, prediction_features=endogenous_features, input_non_time_features=endogenous_features) 
-    
-    tuning_metrics = predictor.tuning_metrics
-    
-    # Output the optimal params over all time points...
-    print(tuning_metrics.get_optimal_params_overall(feature_name='precav'))
-    
-    # ... and conditional on the time point
-    print(tuning_metrics.get_optimal_predictors_and_params_per_timestamp(feature_name='precav')[1])
-        
-    # Show off various charts
-    tuning_metrics.boxplot_errors_by_single_param(feature_name='precav', param_name='p')
-    tuning_metrics.boxplot_errors_by_single_param(feature_name='precav', param_name='d')
-    tuning_metrics.boxplot_errors_by_single_param(feature_name='precav', param_name='q')
-    tuning_metrics.visualise_minimum_errors(feature_name='precav')
-               
-    
-    

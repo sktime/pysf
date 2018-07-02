@@ -1,0 +1,13 @@
+
+# As well as these requirements, you must have either TensorFlow or Theano installed as a backend for Keras, and...
+# dask>=0.15 if you are using TensorFlow; otherwise not required.
+
+pandas>=0.20
+Keras>=2.0
+sklearn
+numpy
+scipy
+matplotlib
+xarray
+abc
+logging

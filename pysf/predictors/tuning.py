@@ -1,6 +1,6 @@
 
 from .logger import LoggingHandler 
-from .framework import ScoringResult, AbstractPredictor
+from .framework import AbstractPredictor
 from .errors import ErrorCurve
 from .utils import numpy_to_native
 
@@ -663,26 +663,5 @@ class TuningTimestampMultiplexerPredictor(AbstractPredictor):
         return (self.__class__.__name__ + '(' + str(len(self._list_predictor_template_parameter_iterator_tupes)) + ' predictor/parameter tuples, scoring_feature_name = ' + self._scoring_feature_name + ', scoring_metric = ' + self._scoring_metric + ', series_splitter = ' + str(self._series_splitter) + ')')
 
 
-        
-##################################################
-# For testing
-##################################################        
-        
-if False:
-    
-    # http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.ParameterSampler.html
-    from scipy.stats.distributions import expon
-    np.random.seed(0)
-    param_grid = {'a':[1, 2], 'b': expon()}
-    param_list = list(ParameterSampler(param_grid, n_iter=4))
-    print(param_list)
-    #rounded_list = [ dict((k, round(v, 6)) for (k, v) in d.items()) for d in param_list ]
-    
-    # http://scikit-learn.org/stable/modules/generated/sklearn.model_selection.ParameterGrid.html
-    param_grid = {'a': [1, 2], 'b': [True, False]}
-    param_list = list(ParameterGrid(param_grid)) 
-    print(param_list)
-    
-    
 
-    
+        

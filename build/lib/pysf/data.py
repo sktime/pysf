@@ -1,18 +1,24 @@
 
 
 from .logger import LoggingHandler 
-from .splits import SlidingWindowTimeSeriesSplit, ExpandingWindowTimeSeriesSplit
+from .splits import SlidingWindowTimeSeriesSplit
 from .errors import RawResiduals
 
-import scipy.io as sio
+# Core dependencies
 import pandas as pd
 import xarray as xr
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
-from itertools import product
 from sklearn.model_selection import KFold
 
+# Dependencies for data acquisition
+import requests
+from io import BytesIO
+from zipfile import ZipFile
+import tempfile
+import os
+import scipy.io as sio
     
     
 def load_dummy_data_df(series_count = 10, timestamp_count = 5, time_feature_count = 3, series_feature_count = 2, vs_times_series_factor = 10000, vs_times_timestamps_factor = 100, vs_series_series_factor = 10000):
@@ -38,6 +44,85 @@ def load_dummy_data_df(series_count = 10, timestamp_count = 5, time_feature_coun
     
     return (dummy_vs_times_df, dummy_vs_series_df) 
 
+    
+def download_zipfile(url):
+    content = requests.get(url)
+    zipped = ZipFile(BytesIO(content.content))
+    return zipped
+    
+    
+def download_ramsay_weather_data_dfs():
+    zipped = download_zipfile('http://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/fdaM.zip')
+    tempdir = tempfile.TemporaryDirectory()
+    zipped.extract(member='examples/weather/daily.mat', path=tempdir.name)
+    weather_data_dict = sio.loadmat(os.path.join(tempdir.name, 'examples/weather/daily.mat'))
+
+    weather_tempav_df = pd.DataFrame(weather_data_dict['tempav'])
+    weather_tempav_df['day_of_year'] = weather_tempav_df.index.values + 1
+    weather_tempav_df = pd.melt(weather_tempav_df, id_vars=['day_of_year'])
+    weather_tempav_df.rename(columns={'variable' : 'weather_station', 'value' : 'tempav'}, inplace=True)
+    #weather_tempav_df
+    
+    weather_precav_df = pd.DataFrame(weather_data_dict['precav'])
+    weather_precav_df['day_of_year'] = weather_precav_df.index.values + 1
+    weather_precav_df = pd.melt(weather_precav_df, id_vars=['day_of_year'])
+    weather_precav_df.rename(columns={'variable' : 'weather_station', 'value' : 'precav'}, inplace=True)
+    #weather_precav_df
+    
+    weather_vs_times_df = pd.merge(weather_tempav_df, weather_precav_df)
+    weather_vs_series_df= None
+    return (weather_vs_times_df, weather_vs_series_df)
+
+
+def download_ramsay_growth_data_dfs():
+    zipped = download_zipfile('http://www.psych.mcgill.ca/misc/fda/downloads/FDAfuns/Matlab/fdaM.zip')
+    tempdir = tempfile.TemporaryDirectory()
+    zipped.extract(member='examples/growth/growth.mat', path=tempdir.name)
+    growth_data_dict = sio.loadmat(os.path.join(tempdir.name, 'examples/growth/growth.mat'))
+
+    ages_arr = growth_data_dict['age']
+
+    boys_df = pd.DataFrame(growth_data_dict['hgtmmat'])
+    boys_df['age'] = ages_arr
+    boys_df = pd.melt(boys_df, id_vars=['age'])
+    boys_df.rename(columns={'variable' : 'cohort_id', 'value' : 'height'}, inplace=True)
+    boys_df['gender'] = 'boy'
+    #boys_df
+    
+    girls_df = pd.DataFrame(growth_data_dict['hgtfmat'])
+    girls_df['age'] = ages_arr
+    girls_df = pd.melt(girls_df, id_vars=['age'])
+    girls_df.rename(columns={'variable' : 'cohort_id', 'value' : 'height'}, inplace=True)
+    girls_df['gender'] = 'girl'
+    #girls_df
+
+    growth_df = pd.concat([boys_df, girls_df])
+    
+    growth_vs_times_df = growth_df
+    growth_vs_series_df = growth_df.drop(['age', 'height'], axis=1).drop_duplicates()
+    
+    return (growth_vs_times_df, growth_vs_series_df)
+    
+    
+def download_ecg_data_dfs():
+    zipped = download_zipfile('http://timeseriesclassification.com/Downloads/ECG200.zip')
+    tempdir = tempfile.TemporaryDirectory()
+    zipped.extract(member='ECG200/ECG200.csv', path=tempdir.name)
+    ecg_filepath = os.path.join(tempdir.name, 'ECG200/ECG200.csv')
+    
+    raw_df = pd.read_csv(ecg_filepath, names=([str(x) for x in range(96)] + ['class_label']), skiprows=101)
+    raw_df['heartbeat'] = raw_df.index.values  
+    ecg_vs_series = raw_df[['heartbeat', 'class_label']]     
+    
+    raw_df = raw_df.melt(id_vars = ['heartbeat', 'class_label'])
+    raw_df.rename(columns={ 'variable' : 'timestamp', 'value' : 'potential_difference' }, inplace=True)
+    raw_df['timestamp'] = raw_df['timestamp'].astype(int)
+    ecg_vs_times = raw_df[['heartbeat', 'timestamp', 'potential_difference']]
+    
+    ecg_vs_series['is_abnormal'] = (ecg_vs_series['class_label'] == -1)
+    ecg_vs_series.drop('class_label', axis=1, inplace=True)
+    return (ecg_vs_times, ecg_vs_series)
+    
     
 # Design patterns used: Flyweight, Prototype.
 class MultiSeries(LoggingHandler):
@@ -1168,186 +1253,3 @@ class MultiSeries(LoggingHandler):
     
 
         
-  
-
-##################################################
-# For testing
-##################################################
-        
-       
-if False:
-    
-    (dummy_vs_times_df, dummy_vs_series_df) = load_dummy_data_df()
-    print(dummy_vs_times_df)
-    print(dummy_vs_series_df)
-    data_dummy = MultiSeries(data_vs_times_df=dummy_vs_times_df, data_vs_series_df=dummy_vs_series_df, time_colname='timestamp', series_id_colnames='series')
-    data_dummy.visualise()
-
-if False:
-    
-    (boston_vs_times_df, boston_vs_series_df) = load_boston_housing_data_df()
-    print(boston_vs_times_df)
-    print(boston_vs_series_df)
-    data_boston = MultiSeries(data_vs_times_df=boston_vs_times_df, data_vs_series_df=boston_vs_series_df, time_colname='feature', series_id_colnames='sample')
-    data_boston.visualise()
-    
-if False:   
-
-    (weather_vs_times_df, weather_vs_series_df) = load_ramsay_weather_data_dfs()
-    data_weather = MultiSeries(data_vs_times_df=weather_vs_times_df, data_vs_series_df=weather_vs_series_df, time_colname='day_of_year', series_id_colnames='weather_station')
-        
-    (growth_vs_times_df, growth_vs_series_df) = load_ramsay_growth_data_dfs()
-    growth_vs_series_df['gender'] = growth_vs_series_df['gender'].astype('category')
-    growth_vs_series_df = pd.concat([growth_vs_series_df, pd.get_dummies(growth_vs_series_df['gender'])], axis=1)
-    data_growth = MultiSeries(data_vs_times_df=growth_vs_times_df, data_vs_series_df=growth_vs_series_df, time_colname='age', series_id_colnames=['gender', 'cohort_id'])
-    
-    #data_growth.get_backward_time_window(5, 18).visualise(filter_value_colnames='height')
-    
-    data_growth.get_backward_time_window(5, 12)._time_uniques_all
-    
-    data_growth.get_forward_time_window(5, 15.5)._time_uniques_all
-    
-    
-    
-    
-    data_weather_v2 = data_weather.get_backward_time_window(5).new_mutable_instance()
-    data_weather_v2._data_vs_times_df
-    
-    data_weather_v2._data_vs_times_df.loc[(33,[366]), ['precav', 'tempav']] = [1,2]
-    data_weather_v2._data_vs_times_df
-    
-    data_weather_v2.set_time_labelled_values(prediction_series=[34], prediction_features=['precav', 'tempav'], prediction_times=[366], values=[1,2])
-    data_weather_v2._data_vs_times_df
-    
-    # new_data_vs_times_df.loc[(series_id, times_list), value_colnames_vs_times]
-    #data_weather_v2._data_vs_times_df.loc[(33,366),:] = [1,2]
-    #data_weather_v2._data_vs_times_df.sort_index()
-    
-    data_growth_v2 = data_growth.get_backward_time_window(5).new_mutable_instance()
-    
-    
-    
-    
-    if False: 
-        
-        data_weather.visualise(title='Weather data')
-        data_weather.visualise_means(title='Weather data')
-        data_weather.visualise_arrays(include_time_as_feature=True)
-        
-        data_growth.visualise(title='Growth data')
-        data_growth.visualise_means(title='Growth data')
-        data_growth.visualise_arrays(include_time_as_feature=True)
-        
-        
-        # Ready for cross-validation
-        for (ot, ov) in data_weather.generate_series_folds(series_splitter = KFold(n_splits=5)):
-            print('Outer Loop. Training = ' + str(ot._series_id_uniques) + ' / Validation = ' + str(ov._series_id_uniques))
-            for (it, iv) in ot.generate_series_folds(series_splitter = KFold(n_splits=5)):
-                print('Inner Loop. Training = ' + str(it._series_id_uniques) + ' / Validation = ' + str(iv._series_id_uniques))
-                for (st, sv) in it.generate_time_windows(time_splitter = SlidingWindowTimeSeriesSplit(count_timestamps=len(it._time_uniques_all), training_set_size=100, validation_set_size=50, step=50)):
-                    print('Timeseries Loop. Training = ' + str(st._time_uniques_all) + ' / Validation = ' + str(sv._time_uniques_all))
-                 
-                    
-        # Ready for cross-validation
-        for (ot, ov) in data_growth.generate_series_folds(series_splitter = KFold(n_splits=5)):
-            print('Outer Loop. Training = ' + str(ot._series_id_uniques) + ' / Validation = ' + str(ov._series_id_uniques))
-            for (it, iv) in ot.generate_series_folds(series_splitter = KFold(n_splits=5)):
-                print('Inner Loop. Training = ' + str(it._series_id_uniques) + ' / Validation = ' + str(iv._series_id_uniques))
-                for (st, sv) in it.generate_time_windows(time_splitter = SlidingWindowTimeSeriesSplit(count_timestamps=len(it._time_uniques_all), training_set_size=2, validation_set_size=5, step=5)):
-                    print('Timeseries Loop. Training = ' + str(st._time_uniques_all) + ' / Validation = ' + str(sv._time_uniques_all))
-                    
-             
-   
-       
-if False:
-    
-    # Data: weather
-    (weather_vs_times_df, weather_vs_series_df) = load_ramsay_weather_data_dfs()
-    data_weather = MultiSeries(data_vs_times_df=weather_vs_times_df, data_vs_series_df=weather_vs_series_df, time_colname='day_of_year', series_id_colnames='weather_station')
-    #data_weather.visualise()
-    
-    # Data: growth
-    (growth_vs_times_df, growth_vs_series_df) = load_ramsay_growth_data_dfs()
-    growth_vs_series_df['gender'] = growth_vs_series_df['gender'].astype('category')
-    growth_vs_series_df = pd.concat([growth_vs_series_df, pd.get_dummies(growth_vs_series_df['gender'])], axis=1)
-    data_growth = MultiSeries(data_vs_times_df=growth_vs_times_df, data_vs_series_df=growth_vs_series_df, time_colname='age', series_id_colnames=['gender', 'cohort_id'])
-    #data_growth.visualise()
-
-    input_sliding_window_size = 10
-    output_sliding_window_size = 5
-    
-    (a4d_vs_times_windowed_input, a4d_vs_times_windowed_output) = data_growth.select_paired_tabular_windowed_4d_arrays(input_sliding_window_size=input_sliding_window_size, output_sliding_window_size=output_sliding_window_size)
-    print('a4d_vs_times_windowed_input.shape = ' + str(a4d_vs_times_windowed_input.shape))
-    print('a4d_vs_times_windowed_output.shape = ' + str(a4d_vs_times_windowed_output.shape))
-    
-    (a4d_vs_times_windowed_input, a4d_vs_times_windowed_output) = data_weather.select_paired_tabular_windowed_4d_arrays(input_sliding_window_size=input_sliding_window_size, output_sliding_window_size=output_sliding_window_size)
-    print('a4d_vs_times_windowed_input.shape = ' + str(a4d_vs_times_windowed_input.shape))
-    print('a4d_vs_times_windowed_output.shape = ' + str(a4d_vs_times_windowed_output.shape))
-    
-
-if False:
-    # Data: weather
-    (weather_vs_times_df, weather_vs_series_df) = load_ramsay_weather_data_dfs()
-    data_weather = MultiSeries(data_vs_times_df=weather_vs_times_df, data_vs_series_df=weather_vs_series_df, time_colname='day_of_year', series_id_colnames='weather_station')
-
-    data_weather.visualise()
-    
-    weather_vs_times_df[weather_vs_times_df.weather_station == 28].set_index('day_of_year')['tempav'].plot()
-    weather_vs_times_df[weather_vs_times_df.weather_station == 28].set_index('day_of_year')['precav'].plot()
-    
-    
-              
-if False:
-    # Data: ECG
-    (ecg_vs_times_df, ecg_vs_series_df) = load_ecg_data_dfs()
-    data_ecg = MultiSeries(data_vs_times_df=ecg_vs_times_df, data_vs_series_df=ecg_vs_series_df, time_colname='timestamp', series_id_colnames='heartbeat')
-
-    # 133 are normal, the remaining 67 are abnormal.
-    ecg_vs_series_df.groupby('is_abnormal').count()
-    ecg_vs_times_df['timestamp'].max() # divide into first half (0...47) and second half (48...95)
-    
-    data_ecg.visualise(filter_value_colnames='potential_difference')
-    data_ecg.visualise_moments(filter_value_colnames='potential_difference')
-    
-    
-    
-              
-if False:
-    # Data: Starlight
-    (starlight_vs_times_df, starlight_vs_series_df) = load_starlight_data_dfs()
-    data_starlight = MultiSeries(data_vs_times_df=starlight_vs_times_df, data_vs_series_df=starlight_vs_series_df, time_colname='folded_time', series_id_colnames='starlight_curve')
-
-    starlight_vs_times_df['folded_time'].max() 
-    
-    data_starlight.visualise(filter_value_colnames='magnitude')
-    data_starlight.visualise_moments(filter_value_colnames='magnitude')
-    
-    
-    
-if False:
-    
-    # Data: Power: Multiple locations & days
-    #(power_vs_times_df, power_vs_series_df) = load_power_data_dfs(power_filename='multiple_locations_multiple_days.csv' )
-    (power_vs_times_df, power_vs_series_df) = load_power_data_multiple_locations_multiple_days_dfs()
-    data_power_multiple_locations_multiple_days = MultiSeries(data_vs_times_df=power_vs_times_df, data_vs_series_df=power_vs_series_df, time_colname='half_hour', series_id_colnames='series_id')
-    data_power_multiple_locations_multiple_days.visualise(title='Multiple locations & days')
-    data_power_multiple_locations_multiple_days.visualise_moments(title='Multiple locations & days')
-    
-    # Data: Power: One day, multiple locations
-    #(power_vs_times_df, power_vs_series_df) = load_power_data_dfs(power_filename='one_day_multiple_locations.csv' )
-    (power_vs_times_df, power_vs_series_df) = load_power_data_one_day_multiple_locations_dfs()
-    data_power_one_day_multiple_locations = MultiSeries(data_vs_times_df=power_vs_times_df, data_vs_series_df=power_vs_series_df, time_colname='half_hour', series_id_colnames='series_id')
-    data_power_one_day_multiple_locations.visualise(title='One day, multiple locations')
-    data_power_one_day_multiple_locations.visualise_moments(title='One day, multiple locations')
-    
-    # Data: Power: One location, multiple days
-    #(power_vs_times_df, power_vs_series_df) = load_power_data_dfs(power_filename='one_location_multiple_days.csv' )
-    (power_vs_times_df, power_vs_series_df) = load_power_data_one_location_multiple_days_dfs()
-    data_power_one_location_multiple_days = MultiSeries(data_vs_times_df=power_vs_times_df, data_vs_series_df=power_vs_series_df, time_colname='half_hour', series_id_colnames='series_id')
-    data_power_one_location_multiple_days.visualise(title='One location, multiple days')
-    data_power_one_location_multiple_days.visualise_moments(title='One location, multiple days')
-    
-    
-    
-    
-    

@@ -8,19 +8,55 @@ from .errors import ErrorCurve
 from .utils import get_friendly_list_string, from_pickle
 
 from sklearn.model_selection import KFold
-
 import pandas as pd
 import numpy as np
 import math
 import os
-
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
 
 
 
 
 def combine_evaluators(list_of_input_tupes):
+    """This is an example of a module level function.
+    Function parameters should be documented in the ``Args`` section. The name
+    of each parameter is required. The type and description of each parameter
+    is optional, but should be included if not obvious.
+    Parameter types -- if given -- should be specified according to
+    `PEP 484`_, though `PEP 484`_ conformance isn't required or enforced.
+    If \*args or \*\*kwargs are accepted,
+    they should be listed as ``*args`` and ``**kwargs``.
+    The format for a parameter is::
+        name (type): description
+            The description may span multiple lines. Following
+            lines should be indented. The "(type)" is optional.
+            Multiple paragraphs are supported in parameter
+            descriptions.
+    Args:
+        param1 (int): The first parameter.
+        param2 (Optional[str]): The second parameter. Defaults to None.
+            Second line of description should be indented.
+        *args: Variable length argument list.
+        **kwargs: Arbitrary keyword arguments.
+    Returns:
+        bool: True if successful, False otherwise.
+        The return type is optional and may be specified at the beginning of
+        the ``Returns`` section followed by a colon.
+        The ``Returns`` section may span multiple lines and paragraphs.
+        Following lines should be indented to match the first line.
+        The ``Returns`` section supports any reStructuredText formatting,
+        including literal blocks::
+            {
+                'param1': param1,
+                'param2': param2
+            }
+    Raises:
+        AttributeError: The ``Raises`` section is a list of all exceptions
+            that are relevant to the interface.
+        ValueError: If `param2` is equal to `param1`.
+    .. _PEP 484:
+       https://www.python.org/dev/peps/pep-0484/
+    """
     res = GeneralisationPerformanceEvaluator(data=None, prediction_times=None)
     res.dict_target_and_feature_name_to_list_of_intermediate_scoring_results = {}
     res.dict_target_to_list_of_tuning_metrics = {}
@@ -41,7 +77,7 @@ def combine_evaluators(list_of_input_tupes):
                 #print(tgt)
                 val_list = evaluator.dict_target_to_list_of_tuning_metrics[tgt]
                 res.dict_target_to_list_of_tuning_metrics[tgt] = val_list
-    # ENDL for (evaluator_filepath, friendly_keys) in list_of_input_tupes
+    # END for (evaluator_filepath, friendly_keys) in list_of_input_tupes
     res.calculate_second_pass()
     return res
                 
@@ -672,16 +708,5 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
         self.generalisation_metrics_per_timestamp_df = state_dict['generalisation_metrics_per_timestamp_df']
         self.initLogger()
     
-    
-    
-##################################################
-# For testing
-##################################################
-   
-   
-if False:
-    print('See demo_generalisation.py')
 
-    
-  
-    
+        

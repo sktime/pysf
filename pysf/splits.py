@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 from sklearn.model_selection import KFold
 import numpy as np
 import unittest
-
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
@@ -314,34 +313,6 @@ class TestSlidingWindowTimeSeriesSplit(unittest.TestCase):
         
 if __name__ == "__main__":
 
-    if True:
-        TestSlidingWindowTimeSeriesSplit().run()
-    else:
-        TestSlidingWindowTimeSeriesSplit().test_splits_18_observations_step_1()   
-        TestSlidingWindowTimeSeriesSplit().test_splits_7_observations_step_1() 
-        TestSlidingWindowTimeSeriesSplit().test_splits_18_observations_step_2()   
-        TestSlidingWindowTimeSeriesSplit().test_splits_7_observations_step_2() 
-        TestSlidingWindowTimeSeriesSplit().test_splits_18_observations_step_5()   
-        TestSlidingWindowTimeSeriesSplit().test_splits_7_observations_step_5() 
+    TestSlidingWindowTimeSeriesSplit().run()
     
-          
-    if True:
-            
-        for step in [1, 2, 3]:
-            for (count_timestamps, training_set_size, validation_set_size) in [(5, 1, 1), (18, 3, 2), (50, 10, 5)]:
-                # Rolling window
-                swin = SlidingWindowTimeSeriesSplit(count_timestamps=count_timestamps, training_set_size=training_set_size, validation_set_size=validation_set_size, step=step)
-                print(swin)
-                swin.visualise()
-                for (idx_train_all, idx_test_all) in swin:
-                    print('Train = ' + str(idx_train_all) + ', Test = ' + str(idx_test_all))
-                print()
-                
-                # Expanding window
-                ewin = ExpandingWindowTimeSeriesSplit(count_timestamps=count_timestamps, training_set_size=training_set_size, validation_set_size=validation_set_size, step=step)
-                print(ewin)
-                ewin.visualise()
-                for (idx_train_all, idx_test_all) in ewin:
-                    print('Train = ' + str(idx_train_all) + ', Test = ' + str(idx_test_all))
-                print()
     

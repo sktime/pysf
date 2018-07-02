@@ -1,7 +1,7 @@
 
 
 from .logger import LoggingHandler 
-from .framework import MultiCurveTabularPredictor, MultiCurveTabularWindowedPredictor, SingleCurveTabularWindowedPredictor
+from .framework import MultiCurveTabularWindowedPredictor
 from .utils import clear_tf_mem
 
 from keras.models import Sequential
@@ -10,8 +10,6 @@ from keras.callbacks import Callback
 
 from sklearn.preprocessing import MinMaxScaler
 
-import numpy as np
-import pandas as pd
 import math
 import gc
 from datetime import datetime
@@ -285,189 +283,5 @@ class MultiCurveWindowedLstmPredictor(MultiCurveTabularWindowedPredictor, Abstra
         self.debug('Done compacting')
             
             
-            
-            
-############################################################################################################
-# Deleted the MultiCurveLstmPredictor as I am not sure if the LSTM architecture can be adapted
-# see:
-#    - https://github.com/fchollet/keras/issues/4870
-#    - https://github.com/fchollet/keras/issues/2892
-############################################################################################################
-
-            
-
-
-
-################################
-# For testing
-################################
-            
-if False:
-    
-    
-    ##############################
-    # Set parameters as attributes
-    ##############################
-    
-    from pysf.data import load_ramsay_weather_data_dfs, load_ramsay_growth_data_dfs, MultiSeries
-    from sklearn.model_selection import KFold
-    
-    # Data: weather
-    (weather_vs_times_df, weather_vs_series_df) = load_ramsay_weather_data_dfs()
-    data_weather = MultiSeries(data_vs_times_df=weather_vs_times_df, data_vs_series_df=weather_vs_series_df, time_colname='day_of_year', series_id_colnames='weather_station')
-    #data_weather.visualise()
-    
-    # Data: growth
-    (growth_vs_times_df, growth_vs_series_df) = load_ramsay_growth_data_dfs()
-    growth_vs_series_df['gender'] = growth_vs_series_df['gender'].astype('category')
-    growth_vs_series_df = pd.concat([growth_vs_series_df, pd.get_dummies(growth_vs_series_df['gender'])], axis=1)
-    data_growth = MultiSeries(data_vs_times_df=growth_vs_times_df, data_vs_series_df=growth_vs_series_df, time_colname='age', series_id_colnames=['gender', 'cohort_id'])
-    #data_growth.visualise()
-
-    # This is a slightly hacky way to generate a single training/test split, since my validation prevents you passing in k=1
-    splits = list(data_weather.generate_series_folds(series_splitter=KFold(n_splits=5)))
-    (training_instance, validation_instance) = splits[0]
-    
-    predictor = MultiCurveWindowedLstmPredictor()   
-    predictor.width_input = 100
-    predictor.width_output = 20 
-    predictor.train_over_prediction_times = True
-    predictor.hidden_units = [20, 10]
-    predictor.training_epochs = 10
-    predictor.input_dropout = 0.2
-    predictor.recurrent_dropout = 0.12
-    print(predictor)
-    
-    times = np.arange(301,366)
-    time_as_feature = False
-    prediction_features = ['tempav', 'precav']
-    
-    predictor.fit(X=training_instance, input_time_feature=time_as_feature, prediction_times=times, prediction_features=prediction_features, input_non_time_features=prediction_features) 
-    scoring_results = predictor.score(X=validation_instance, input_time_feature=time_as_feature, prediction_times=times, prediction_features=prediction_features, input_non_time_features=prediction_features)
-    
-    
-    individual_result = scoring_results['tempav']
-    individual_result.Y_true.visualise()
-    individual_result.Y_hat.visualise(filter_value_colnames='tempav')
-    individual_result.err.visualise_per_timestamp()
-            
-    individual_result = scoring_results['precav']
-    individual_result.Y_hat.visualise(filter_value_colnames='precav')
-    individual_result.err.visualise_per_timestamp()
-    
-    
-    
-if False:
-    
-    ##############################
-    # Set parameters as dictionary
-    ##############################
-    
-    from pysf.data import load_ramsay_weather_data_dfs, load_ramsay_growth_data_dfs, MultiSeries
-    from sklearn.model_selection import KFold
-    
-    # Data: weather
-    (weather_vs_times_df, weather_vs_series_df) = load_ramsay_weather_data_dfs()
-    data_weather = MultiSeries(data_vs_times_df=weather_vs_times_df, data_vs_series_df=weather_vs_series_df, time_colname='day_of_year', series_id_colnames='weather_station')
-    #data_weather.visualise()
-    
-    # Data: growth
-    (growth_vs_times_df, growth_vs_series_df) = load_ramsay_growth_data_dfs()
-    growth_vs_series_df['gender'] = growth_vs_series_df['gender'].astype('category')
-    growth_vs_series_df = pd.concat([growth_vs_series_df, pd.get_dummies(growth_vs_series_df['gender'])], axis=1)
-    data_growth = MultiSeries(data_vs_times_df=growth_vs_times_df, data_vs_series_df=growth_vs_series_df, time_colname='age', series_id_colnames=['gender', 'cohort_id'])
-    #data_growth.visualise()
-
-    # This is a slightly hacky way to generate a single training/test split, since my validation prevents you passing in k=1
-    splits = list(data_weather.generate_series_folds(series_splitter=KFold(n_splits=5)))
-    (training_instance, validation_instance) = splits[0]
-  
-    predictor = MultiCurveWindowedLstmPredictor()
-    predictor.set_parameters({ 'hidden_units' : 64, 'training_epochs' : 8, 'input_dropout' : 0.1, 'recurrent_dropout' : 0.05, 'width_input' : 100, 'width_output': 5, 'train_over_prediction_times' : True })
-    print(predictor)
-    
-    times = np.arange(301,366)
-    time_as_feature = False
-    prediction_features = ['tempav', 'precav']
-    
-    predictor.fit(X=training_instance, input_time_feature=time_as_feature, prediction_times=times, prediction_features=prediction_features, input_non_time_features=prediction_features) 
-    scoring_results = predictor.score(X=validation_instance, input_time_feature=time_as_feature, prediction_times=times, prediction_features=prediction_features, input_non_time_features=prediction_features)
-    
-    
-    individual_result = scoring_results['tempav']
-    individual_result.Y_true.visualise()
-    individual_result.Y_hat.visualise(filter_value_colnames='tempav')
-    individual_result.err.visualise_per_timestamp()
-            
-    individual_result = scoring_results['precav']
-    individual_result.Y_hat.visualise(filter_value_colnames='precav')
-    individual_result.err.visualise_per_timestamp()
-    
-    
-    
-
-##################################################
-# For testing
-##################################################
-
-
-if False:
-    
-    ##############################
-    # Tuning for precav
-    ##############################
-    
-    from pysf.data import MultiSeries, load_ramsay_weather_data_dfs, load_ramsay_growth_data_dfs
-    from pysf.predictors.tuning import TuningOverallPredictor
-    from sklearn.model_selection import ParameterGrid, ParameterSampler
-    from scipy.stats import randint # uniform discrete RV
-    from scipy.stats import uniform # uniform continuous RV
-    from sklearn.model_selection import KFold
-    
-    # Data: weather
-    (weather_vs_times_df, weather_vs_series_df) = load_ramsay_weather_data_dfs()
-    data_weather = MultiSeries(data_vs_times_df=weather_vs_times_df, data_vs_series_df=weather_vs_series_df, time_colname='day_of_year', series_id_colnames='weather_station')
-    #data_weather.visualise()
-    
-    # { 'hidden_units' : 64, 'training_epochs' : 4, 'width_input' : 100, 'width_output': 20, 'train_over_prediction_times' : True }
-    param_sampler = ParameterSampler(n_iter=2, param_distributions={   'width_input' : [ 50, 100, 150, 200 ]
-                                                                     , 'width_output' : [ 1, 5, 10, 50 ]
-                                                                     , 'train_over_prediction_times' : [True, False]
-                                                                     , 'hidden_units' : [ 5, 10, 20, 50, [5,10], [10,20], [20,50], [5,10,20], [10,20,50] ]
-                                                                     , 'training_epochs' : randint(low=1, high=2)
-                                                                     #, 'training_epochs' : randint(low=1, high=10)
-                                                                     , 'input_dropout' : np.arange(0.0, 0.7, 0.2)
-                                                                     , 'recurrent_dropout' : np.arange(0.0, 0.7, 0.2)
-                                                                    })
-    predictor = TuningOverallPredictor(predictor_template=MultiCurveWindowedLstmPredictor(), parameter_iterator=param_sampler, scoring_metric='rmse', scoring_feature_name='precav'
-                                       , series_splitter=KFold(n_splits=3))
-    
-    times = np.arange(301,366)
-    time_as_feature = False
-    prediction_features = ['tempav', 'precav']
-  
-    
-    predictor.fit(X=data_weather, input_time_feature=time_as_feature, prediction_times=times, prediction_features=prediction_features, input_non_time_features=prediction_features) 
-    
-    predictor.tuning_metrics.get_optimal_params_overall(feature_name='precav', metric='rmse')
-    
-    
-    scoring_results = predictor.score(X=data_weather, input_time_feature=time_as_feature, prediction_times=times, prediction_features=prediction_features, input_non_time_features=prediction_features)
-    
-    
-    individual_result = scoring_results['precav']
-    individual_result.Y_hat.visualise(filter_value_colnames='precav')
-    individual_result.err.visualise_per_timestamp()
-    
-    # (1.5340515726396318, 0.11151071929943679, {'hidden_units': 256, 'train_over_prediction_times': False, 'training_epochs': 4, 'width_input': 100, 'width_output': 5})
-    predictor.tuning_metrics.get_optimal_params_overall(feature_name='precav', metric='rmse')
-    
-    predictor.tuning_metrics.boxplot_errors_by_single_param(feature_name='precav', param_name='hidden_units')
-    predictor.tuning_metrics.boxplot_errors_by_single_param(feature_name='precav', param_name='training_epochs')
-    predictor.tuning_metrics.boxplot_errors_by_single_param(feature_name='precav', param_name='train_over_prediction_times')
-    predictor.tuning_metrics.boxplot_errors_by_single_param(feature_name='precav', param_name='width_input')
-    predictor.tuning_metrics.boxplot_errors_by_single_param(feature_name='precav', param_name='width_output')
-    predictor.tuning_metrics.visualise_minimum_errors(feature_name='precav')
-
-    
+ 
     

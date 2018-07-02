@@ -79,38 +79,5 @@ class GlobalLogger(LoggingHandler):
 # the Pythonic way is to use a module-bound variable)
 global_logger = GlobalLogger()
 
-        
-      
-##################################################
-# For testing
-##################################################
 
-if False:
-    
-    # Create test class A that inherits the base class
-    class testclassa(LoggingHandler):
-        def testmethod1(self):
-            # call self.log.<log level> instead of logging.log.<log level>
-            self.debug("debug from test class A")
-            self.info("info from test class A")
-            self.warning("warning from test class A")
-            self.error("error from test class A")
-    
-    
-    # Create test class B that inherits the base class
-    class testclassb(LoggingHandler):
-        def __init__(self, *args, **kwargs):
-            # Make this class more restrictive.
-            self.initLogger(logging.WARNING)
-            
-        def testmethod2(self):
-            # call self.log.<log level> instead of logging.log.<log level>
-            self.debug("debug from test class B")
-            self.info("info from test class B")
-            self.warning("warning from test class B")
-            self.error("error from test class B")
-    
-    
-    testclassa().testmethod1()
-    testclassb().testmethod2()
         

@@ -16,13 +16,13 @@ print('image_output_dirpath = '+ str(image_output_dirpath))
 save_images = False
 
 ############################################################################
-# Load & visualise data
+# Download & visualise data
 ############################################################################
 
-from multipred.data import load_ramsay_weather_data_dfs, MultiSeries
+from pysf.data import download_ramsay_weather_data_dfs, MultiSeries
 
 # Data: growth
-(weather_vs_times_df, weather_vs_series_df) = load_ramsay_weather_data_dfs()
+(weather_vs_times_df, weather_vs_series_df) = download_ramsay_weather_data_dfs()
 data_weather = MultiSeries(data_vs_times_df=weather_vs_times_df, data_vs_series_df=weather_vs_series_df, time_colname='day_of_year', series_id_colnames='weather_station')
 
 data_weather.visualise()
