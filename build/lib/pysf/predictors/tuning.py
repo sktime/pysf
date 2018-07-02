@@ -1,8 +1,8 @@
 
-from .logger import LoggingHandler 
 from .framework import AbstractPredictor
-from .errors import ErrorCurve
-from .utils import numpy_to_native
+from ..logger import LoggingHandler 
+from ..errors import ErrorCurve
+from ..utils import numpy_to_native
 
 from sklearn.model_selection import ParameterGrid, ParameterSampler
 from sklearn.model_selection import KFold

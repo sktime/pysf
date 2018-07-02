@@ -1,8 +1,8 @@
 
 
-from .logger import LoggingHandler 
+from ..logger import LoggingHandler 
 from .framework import MultiCurveTabularWindowedPredictor
-from .utils import clear_tf_mem
+from ..utils import clear_tf_mem
 
 from keras.models import Sequential
 from keras.layers import LSTM, Dense, TimeDistributed, Reshape
