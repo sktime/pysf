@@ -1,7 +1,7 @@
 
 
-![pysf](docs/_static/logo.jpg)
+![pysf](https://github.com/ahmedgc/pysf/raw/master/docs/_static/logo.png)
 
 Supervised forecasting of sequential data in Python.
 
-[Click here to view the documentation.](https://github.com/ahmedgc/pysf/blob/master/docs/_build/html/index.html)
+[Click here to view the documentation.](https://ahmedgc.github.io/pysf)
