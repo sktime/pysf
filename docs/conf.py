@@ -21,6 +21,14 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import os
+import sys
+import platform
+sourcepath = os.path.abspath("../pysf")
+print("Adding source at [" + sourcepath + "] to path")
+sys.path.insert(0, sourcepath)
+#sys.path.insert(0, os.path.abspath("../pysf"))
+print(sys.path)
 
 # -- General configuration ------------------------------------------------
 
