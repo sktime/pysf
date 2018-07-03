@@ -1,0 +1,760 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pysf.predictors.tuning &#8212; pysf 0.0.4 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pysf 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pysf.predictors.tuning</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span> <span class="nn">.framework</span> <span class="k">import</span> <span class="n">AbstractPredictor</span>
+<span class="kn">from</span> <span class="nn">..logger</span> <span class="k">import</span> <span class="n">LoggingHandler</span> 
+<span class="kn">from</span> <span class="nn">..errors</span> <span class="k">import</span> <span class="n">ErrorCurve</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="k">import</span> <span class="n">numpy_to_native</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">ParameterGrid</span><span class="p">,</span> <span class="n">ParameterSampler</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">KFold</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+
+
+
+<span class="c1"># Dicts cannot be used as keys because they are mutable. This is an immutable wrapper around a dict.</span>
+<span class="c1"># Inspired by https://stackoverflow.com/questions/2703599/what-would-a-frozen-dict-be</span>
+<span class="k">class</span> <span class="nc">FrozenDict</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="sd">&quot;&quot;&quot;Don&#39;t forget the docstrings!!&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="c1"># Take a copy just in case the original reference is updated.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># It would have been simpler and maybe more obvious to </span>
+        <span class="c1"># use hash(tuple(sorted(self._d.iteritems()))) from this discussion</span>
+        <span class="c1"># so far, but this solution is O(n). I don&#39;t know what kind of </span>
+        <span class="c1"># n we are going to run into, but sometimes it&#39;s hard to resist the </span>
+        <span class="c1"># urge to optimize when it will gain improved algorithmic performance.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__iter__</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span> <span class="o">^=</span> <span class="nb">hash</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span>
+        
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">)</span>
+    
+
+<div class="viewcode-block" id="TuningMetrics"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningMetrics">[docs]</a><span class="k">class</span> <span class="nc">TuningMetrics</span><span class="p">(</span><span class="n">LoggingHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics_overall_df</span><span class="p">,</span> <span class="n">metrics_per_timestamp_df</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TuningMetrics</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        
+        <span class="c1"># Validation</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">metrics_overall_df</span><span class="p">)</span> <span class="o">!=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the metrics_overall_df parameter to be a pandas DataFrame! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">metrics_overall_df</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">metrics_per_timestamp_df</span><span class="p">)</span> <span class="o">!=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the metrics_per_timestamp_df parameter to be a pandas DataFrame! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">metrics_per_timestamp_df</span><span class="p">)))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_overall_df</span> <span class="o">=</span> <span class="n">metrics_overall_df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_per_timestamp_df</span> <span class="o">=</span> <span class="n">metrics_per_timestamp_df</span>
+       
+        
+<div class="viewcode-block" id="TuningMetrics._get_filtered_metrics_overall"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningMetrics._get_filtered_metrics_overall">[docs]</a>    <span class="k">def</span> <span class="nf">_get_filtered_metrics_overall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics_overall_df</span><span class="p">[</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics_overall_df</span><span class="p">[</span><span class="s1">&#39;metric_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">metric</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics_overall_df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">feature_name</span><span class="p">)</span> <span class="p">]</span></div>
+        
+    
+<div class="viewcode-block" id="TuningMetrics._get_filtered_metrics_per_timestamp"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningMetrics._get_filtered_metrics_per_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">_get_filtered_metrics_per_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics_per_timestamp_df</span><span class="p">[</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics_per_timestamp_df</span><span class="p">[</span><span class="s1">&#39;metric_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">metric</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics_per_timestamp_df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">feature_name</span><span class="p">)</span> <span class="p">]</span></div>
+        
+        
+    <span class="c1"># Returns a 3-tupe of (metric_value, metric_stderr, param_dict) at the optimal/minimal metric value for the given feature</span>
+<div class="viewcode-block" id="TuningMetrics.get_optimal_params_overall"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningMetrics.get_optimal_params_overall">[docs]</a>    <span class="k">def</span> <span class="nf">get_optimal_params_overall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;rmse&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">filtered_metrics_overall_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_filtered_metrics_overall</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">)</span>
+            <span class="n">min_metric_value</span> <span class="o">=</span> <span class="n">filtered_metrics_overall_df</span><span class="p">[</span><span class="s1">&#39;metric_value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">min_row</span> <span class="o">=</span> <span class="n">filtered_metrics_overall_df</span><span class="p">[</span><span class="n">filtered_metrics_overall_df</span><span class="p">[</span><span class="s1">&#39;metric_value&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">min_metric_value</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">min_row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;There are &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_row</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; sets of parameters that minimise the &#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39; metric for the &#39;</span> <span class="o">+</span> <span class="n">feature_name</span> <span class="o">+</span> <span class="s1">&#39; feature, so will pick the first. All optima were: </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_row</span><span class="p">))</span>
+                <span class="n">min_row</span> <span class="o">=</span> <span class="n">min_row</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">min_row</span> <span class="o">=</span> <span class="n">min_row</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># remove all NaN values for params</span>
+            <span class="n">min_metric_stderr</span> <span class="o">=</span> <span class="n">min_row</span><span class="p">[</span><span class="s1">&#39;metric_stderr&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">optimal_param_dict</span> <span class="o">=</span> <span class="n">min_row</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;metric_name&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_stderr&#39;</span><span class="p">,</span> <span class="s1">&#39;feature_name&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            
+            <span class="n">safe_optimal_param_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">paramName</span> <span class="ow">in</span> <span class="n">optimal_param_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">paramVal</span> <span class="o">=</span> <span class="n">numpy_to_native</span><span class="p">(</span><span class="n">optimal_param_dict</span><span class="p">[</span><span class="n">paramName</span><span class="p">])</span>
+                <span class="n">safe_optimal_param_dict</span><span class="p">[</span><span class="n">paramName</span><span class="p">]</span> <span class="o">=</span> <span class="n">paramVal</span>
+                                              
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Exception raised when called for feature_name = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, metric = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">ex</span> <span class="c1"># propagate</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">min_metric_value</span><span class="p">,</span> <span class="n">min_metric_stderr</span><span class="p">,</span> <span class="n">safe_optimal_param_dict</span><span class="p">)</span></div>
+  
+    
+<div class="viewcode-block" id="TuningMetrics.get_optimal_predictors_and_params_per_timestamp"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningMetrics.get_optimal_predictors_and_params_per_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">get_optimal_predictors_and_params_per_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;rmse&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filtered_metrics_per_timestamp_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_filtered_metrics_per_timestamp</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        
+        <span class="c1"># In case this is called on a plain &#39;ol TuningOverallPredictor:</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="s1">&#39;predictor&#39;</span> <span class="ow">in</span> <span class="n">filtered_metrics_per_timestamp_df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+            <span class="n">filtered_metrics_per_timestamp_df</span><span class="p">[</span><span class="s1">&#39;predictor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span>
+            
+        <span class="n">min_metric_values_df</span> <span class="o">=</span> <span class="n">filtered_metrics_per_timestamp_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)[</span><span class="s1">&#39;metric_value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">min_rows_per_timestamp_df</span> <span class="o">=</span> <span class="n">filtered_metrics_per_timestamp_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">min_metric_values_df</span><span class="p">)</span>
+        
+        <span class="n">best_predictors_and_params_df</span> <span class="o">=</span> <span class="n">min_rows_per_timestamp_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;feature_name&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_name&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_stderr&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">best_predictors_and_params_df</span><span class="p">[</span><span class="s1">&#39;predictor_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_predictors_and_params_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span> <span class="c1"># starting at 0</span>
+        <span class="n">min_rows_per_timestamp_with_predictor_ids_df</span> <span class="o">=</span> <span class="n">min_rows_per_timestamp_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">best_predictors_and_params_df</span><span class="p">)[[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;feature_name&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_name&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_stderr&#39;</span><span class="p">,</span> <span class="s1">&#39;predictor_id&#39;</span><span class="p">]]</span>
+    
+        <span class="n">list_optimal_predictors_by_id</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">best_predictors_and_params_df</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">best_predictors_and_params_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">predictor_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;predictor_id&#39;</span><span class="p">]</span>
+            <span class="n">predictor</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;predictor&#39;</span><span class="p">]</span>
+            <span class="n">param_dict</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">&#39;predictor_id&#39;</span><span class="p">,</span> <span class="s1">&#39;predictor&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">list_optimal_predictors_by_id</span><span class="p">[</span><span class="n">predictor_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">param_dict</span><span class="p">)</span>
+    
+        <span class="n">dict_timestamp_to_optimal_predictor_ids</span> <span class="o">=</span> <span class="n">min_rows_per_timestamp_with_predictor_ids_df</span><span class="p">[[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;predictor_id&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s1">&#39;predictor_id&#39;</span><span class="p">]</span>
+            
+        <span class="k">return</span> <span class="p">(</span><span class="n">best_predictors_and_params_df</span><span class="p">,</span> <span class="n">min_rows_per_timestamp_with_predictor_ids_df</span><span class="p">,</span> <span class="n">dict_timestamp_to_optimal_predictor_ids</span><span class="p">,</span> <span class="n">list_optimal_predictors_by_id</span><span class="p">)</span></div>
+        
+        
+<div class="viewcode-block" id="TuningMetrics.boxplot_errors_by_single_param"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningMetrics.boxplot_errors_by_single_param">[docs]</a>    <span class="k">def</span> <span class="nf">boxplot_errors_by_single_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;rmse&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">convert_param_values_to_string</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filtered_metrics_overall_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_filtered_metrics_overall</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">)</span>
+        <span class="n">melted</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">filtered_metrics_overall_df</span><span class="p">,</span> <span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="n">param_name</span><span class="p">,</span> <span class="s1">&#39;metric_name&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_stderr&#39;</span><span class="p">,</span> <span class="s1">&#39;feature_name&#39;</span><span class="p">])</span>
+        <span class="c1"># Deal with unconventional parameter values, like lists:</span>
+        <span class="k">if</span> <span class="n">convert_param_values_to_string</span><span class="p">:</span>
+            <span class="n">melted</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">melted</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="c1"># Do the plotting:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">melted</span><span class="p">[[</span><span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="n">param_name</span><span class="p">]]</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">param_name</span><span class="p">,</span> <span class="n">rot</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+        <span class="c1"># Clear both titles</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Full distribution of cross-validated &#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39; values&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;at values for parameter &#39;</span> <span class="o">+</span> <span class="n">param_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_figure</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+    
+<div class="viewcode-block" id="TuningMetrics.visualise_minimum_errors"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningMetrics.visualise_minimum_errors">[docs]</a>    <span class="k">def</span> <span class="nf">visualise_minimum_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s1">&#39;rmse&#39;</span><span class="p">,</span> <span class="n">filter_param_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stderr_bar_multiple</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Melt &amp; cast</span>
+        <span class="n">filtered_metrics_overall_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_filtered_metrics_overall</span><span class="p">(</span><span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span> <span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">)</span>
+        <span class="n">melted</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">filtered_metrics_overall_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;metric_name&#39;</span><span class="p">,</span> <span class="s1">&#39;feature_name&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_stderr&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;variable&#39;</span> <span class="p">:</span> <span class="s1">&#39;parameter_name&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span> <span class="p">:</span> <span class="s1">&#39;parameter_value&#39;</span><span class="p">})</span>
+        <span class="c1"># TODO: is this right?</span>
+        <span class="n">melted</span><span class="p">[</span><span class="s1">&#39;parameter_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">melted</span><span class="p">[</span><span class="s1">&#39;parameter_value&#39;</span><span class="p">])</span> <span class="c1"># convert any booleans to numeric values to make plotting work</span>
+        <span class="n">melted</span><span class="p">[</span><span class="s1">&#39;metric_stderr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">melted</span><span class="p">[</span><span class="s1">&#39;metric_stderr&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">stderr_bar_multiple</span>
+        
+        <span class="c1"># Validation, AFTER fetching the data</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">filter_param_names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+                <span class="n">filter_param_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">filter_param_names</span><span class="p">]</span>                   
+        <span class="k">if</span> <span class="n">filter_param_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filter_param_names</span> <span class="o">=</span> <span class="n">melted</span><span class="p">[</span><span class="s1">&#39;parameter_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        
+        <span class="c1"># Get the minimum &#39;metric_value&#39; vals and their associated &#39;metric_stderr&#39; vals for each parameter value</span>
+        <span class="n">min_metric_vals_per_param_vals</span> <span class="o">=</span> <span class="n">melted</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;metric_stderr&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;parameter_name&#39;</span><span class="p">,</span> <span class="s1">&#39;parameter_value&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span> <span class="c1"># minimise the &#39;metric_value&#39; field per parameter name + value combo</span>
+        <span class="n">min_metric_vals_per_param_vals</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">melted</span><span class="p">,</span> <span class="n">min_metric_vals_per_param_vals</span><span class="p">)</span> <span class="c1"># merge on the &#39;metric_stderr&#39; field</span>
+        
+        <span class="c1"># Chart</span>
+        <span class="k">for</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">filter_param_names</span><span class="p">:</span>
+            <span class="n">sub_df</span> <span class="o">=</span> <span class="n">min_metric_vals_per_param_vals</span><span class="p">[</span><span class="n">min_metric_vals_per_param_vals</span><span class="p">[</span><span class="s1">&#39;parameter_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">param_name</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;parameter_value&#39;</span><span class="p">)</span> <span class="c1"># sort so it plots properly</span>
+            
+            <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">subtitle</span> <span class="o">=</span> <span class="s1">&#39;Min. cross-validated &#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39; for each value of &#39;</span> <span class="o">+</span> <span class="n">param_name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">subtitle</span> <span class="o">=</span> <span class="n">title</span>
+                
+            <span class="c1"># Fix the x-limits, since the defaults make the error bars illegible</span>
+            <span class="n">x_axis_values</span> <span class="o">=</span> <span class="n">sub_df</span><span class="p">[</span><span class="s1">&#39;parameter_value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">x_axis_min_increment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x_axis_values</span><span class="p">))</span>
+            <span class="n">x_axis_min_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x_axis_values</span><span class="p">)</span>
+            <span class="n">x_axis_max_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x_axis_values</span><span class="p">)</span>
+            <span class="n">xlim_tupe</span><span class="o">=</span><span class="p">(</span><span class="n">x_axis_min_value</span> <span class="o">-</span> <span class="n">x_axis_min_increment</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">x_axis_max_value</span> <span class="o">+</span> <span class="n">x_axis_min_increment</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            
+            <span class="c1">#print(sub_df)</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">sub_df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;parameter_value&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="s1">&#39;metric_stderr&#39;</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="n">xlim_tupe</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">subtitle</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Minimum cross-validated&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39; +/- &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stderr_bar_multiple</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; S.E.&#39;</span><span class="p">)</span></div>
+
+    <span class="c1"># For serialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;metrics_overall_df&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics_overall_df</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;metrics_per_timestamp_df&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metrics_per_timestamp_df</span>
+        <span class="k">return</span> <span class="n">state_dict</span>
+        
+    <span class="c1"># For deserialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_overall_df</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;metrics_overall_df&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_per_timestamp_df</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;metrics_per_timestamp_df&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initLogger</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TuningOverallPredictor"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningOverallPredictor">[docs]</a><span class="k">class</span> <span class="nc">TuningOverallPredictor</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="n">parameter_iterator</span><span class="p">,</span> <span class="n">scoring_feature_name</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="o">=</span><span class="s1">&#39;rmse&#39;</span><span class="p">,</span> <span class="n">series_splitter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TuningOverallPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        
+        <span class="c1"># Validation</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">predictor_template</span><span class="p">),</span> <span class="n">AbstractPredictor</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the predictor_template parameter to be a subclass of AbstractPredictor! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">predictor_template</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">parameter_iterator</span><span class="p">),</span> <span class="n">ParameterGrid</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">parameter_iterator</span><span class="p">),</span> <span class="n">ParameterSampler</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the parameter_iterator parameter to be a subclass of either ParameterGrid or ParameterSampler! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">parameter_iterator</span><span class="p">)))</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">_predictor_template</span> <span class="o">=</span> <span class="n">predictor_template</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_iterator</span> <span class="o">=</span> <span class="n">parameter_iterator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_feature_name</span> <span class="o">=</span> <span class="n">scoring_feature_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metric</span> <span class="o">=</span> <span class="n">scoring_metric</span>
+        
+        <span class="c1"># Default to 5-fold CV</span>
+        <span class="k">if</span> <span class="n">series_splitter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span> <span class="o">=</span> <span class="n">series_splitter</span>
+            
+        <span class="c1"># These will be set later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="o">=</span> <span class="kc">None</span>
+        
+<div class="viewcode-block" id="TuningOverallPredictor.set_parameters"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningOverallPredictor.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>          
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot call set_parameters on an TuningOverallPredictor! parameter_dict = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">))</span></div>
+            
+    <span class="c1"># Implementation of the abstract method. </span>
+    <span class="c1"># Performs the nested cross-validation. Based on the parameters supplied, it decides whether to cross-validated for series and/or timestamps</span>
+    <span class="k">def</span> <span class="nf">_fitImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1"># 1. Do the nested cross-validation.</span>
+                
+        <span class="c1"># Perform the nondeterministic sampling (or deterministic grid iteration) and </span>
+        <span class="c1"># collect the results into a list of samples to allow reuse.</span>
+        <span class="n">param_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameter_iterator</span><span class="p">)</span> <span class="c1"># perform iteration and sampling </span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">param_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="c1"># since the names should be consistent, take them from the very first element</span>
+        
+        <span class="c1"># Contains a dictionary of tuples pointing to lists:</span>
+        <span class="c1"># (Target object, feature name string) -&gt; list of [ intermediate scoring results ]</span>
+        <span class="n">dict_params_and_feature_name_to_list_of_intermediate_scoring_results</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># First pass: for common resamples/folds/splits (to be fair in evaluating models against each other!),</span>
+        <span class="c1"># perform the actual fit &amp; predict and gather up intermediate ScoringResult objects for each (param_dict, feature) combo</span>
+        <span class="n">fold_counter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">training_instance</span><span class="p">,</span> <span class="n">validation_instance</span><span class="p">)</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">generate_series_folds</span><span class="p">(</span><span class="n">series_splitter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Outer CV Loop. Fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Training = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">training_instance</span><span class="o">.</span><span class="n">_series_id_uniques</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; / Validation = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">validation_instance</span><span class="o">.</span><span class="n">_series_id_uniques</span><span class="p">))</span>
+            
+            <span class="n">param_dict_counter</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">param_dict</span> <span class="ow">in</span> <span class="n">param_list</span><span class="p">:</span>  
+                <span class="c1"># Perform the fit &amp; score for this given fold of data and set ()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Within fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, started evaluating param_dict &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">param_dict_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param_list</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">param_dict</span><span class="p">))</span>
+                <span class="n">predictor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predictor_template</span><span class="o">.</span><span class="n">get_deep_copy</span><span class="p">()</span> <span class="c1"># clone to avoid any problems</span>
+                <span class="n">predictor</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">parameter_dict</span> <span class="o">=</span> <span class="n">param_dict</span><span class="p">)</span> <span class="c1"># actually set the params</span>
+                <span class="n">predictor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">training_instance</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+                <span class="n">scoring_results_for_multiple_features</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">validation_instance</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+                <span class="n">predictor</span><span class="o">.</span><span class="n">compact</span><span class="p">()</span>
+                
+                <span class="c1"># For all individual results, construct error curves and cache them in a dictionary</span>
+                <span class="k">for</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="n">scoring_results_for_multiple_features</span><span class="p">:</span>
+                    <span class="n">scoring_result</span> <span class="o">=</span> <span class="n">scoring_results_for_multiple_features</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span>
+                    <span class="c1">#scoring_result.err.visualise_per_timestamp(title=(&#39;INTERMEDIATE: fold &#39; + str(fold_counter)))</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">FrozenDict</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="n">param_dict</span><span class="p">),</span> <span class="n">feature_name</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;First pass. key = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="n">dict_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">):</span>
+                        <span class="n">dict_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># initialise the list if not already there</span>
+                        <span class="n">dict_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scoring_result</span><span class="p">)</span>
+                <span class="c1"># END: feature_name in scoring_results_for_multiple_features</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Within fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, finished evaluating param_dict &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">param_dict_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param_list</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">param_dict</span><span class="p">))</span>
+                <span class="n">param_dict_counter</span> <span class="o">=</span> <span class="n">param_dict_counter</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="c1"># END: for param_dict in param_list</span>
+            <span class="n">fold_counter</span> <span class="o">=</span> <span class="n">fold_counter</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="c1"># END: for (training_instance, validation_instance) in X.generate_series_folds(series_splitter=self._series_splitter)</span>
+     
+        <span class="c1"># Second pass: for each (param_dict, feature) combo, compute a cross-validated error curve</span>
+        <span class="n">tuning_metrics_overall_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tuning_metrics_per_timestamp_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dict_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">:</span>
+            <span class="c1"># Retrieve the intermediate error curves and take their averages over all the CV folds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Second pass. key = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="n">intermediate_scoring_results</span> <span class="o">=</span> <span class="n">dict_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="p">(</span><span class="n">param_dict</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="n">cv_err</span> <span class="o">=</span> <span class="n">ErrorCurve</span><span class="o">.</span><span class="n">init_from_multiple_error_curves</span><span class="p">(</span><span class="n">sequence_error_curves</span><span class="o">=</span><span class="p">[</span><span class="n">sr</span><span class="o">.</span><span class="n">err</span> <span class="k">for</span> <span class="n">sr</span> <span class="ow">in</span> <span class="n">intermediate_scoring_results</span><span class="p">])</span>
+            
+            <span class="c1"># Convert the results to a pair of DFs and store them for later.</span>
+            <span class="c1"># Make sure that parameter values are stored as objects, to allow mixing of types and objects like lists!</span>
+            <span class="n">metrics_overall_df</span> <span class="o">=</span> <span class="n">cv_err</span><span class="o">.</span><span class="n">get_overall_metrics_as_dataframe</span><span class="p">()</span>
+            <span class="n">metrics_per_timestamp_df</span> <span class="o">=</span> <span class="n">cv_err</span><span class="o">.</span><span class="n">get_per_timestamp_metrics_as_dataframe</span><span class="p">()</span>
+            <span class="n">metrics_overall_df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_name</span>
+            <span class="n">metrics_per_timestamp_df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_name</span>
+            <span class="k">for</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">:</span>
+                <span class="n">param_val</span> <span class="o">=</span> <span class="n">param_dict</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span>
+                <span class="n">metrics_overall_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics_overall_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">[</span> <span class="n">param_val</span> <span class="p">])</span>              <span class="c1"># this allows param_val to be a list</span>
+                <span class="n">metrics_overall_df</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics_overall_df</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>                              <span class="c1"># this is to allow mixtures of scalars and lists</span>
+                <span class="n">metrics_per_timestamp_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics_per_timestamp_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">[</span> <span class="n">param_val</span> <span class="p">])</span>  <span class="c1"># this allows param_val to be a list</span>
+                <span class="n">metrics_per_timestamp_df</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics_per_timestamp_df</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>                  <span class="c1"># this is to allow mixtures of scalars and lists</span>
+            <span class="n">tuning_metrics_overall_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics_overall_df</span><span class="p">)</span>
+            <span class="n">tuning_metrics_per_timestamp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics_per_timestamp_df</span><span class="p">)</span>
+        <span class="c1"># END: for key in dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span>
+        
+        <span class="c1"># Concatenate the dataframes into a single list and wrap it all up in a container</span>
+        <span class="n">tuning_metrics_overall_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">tuning_metrics_overall_list</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">tuning_metrics_per_timestamp_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">tuning_metrics_per_timestamp_list</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="o">=</span> <span class="n">TuningMetrics</span><span class="p">(</span><span class="n">metrics_overall_df</span><span class="o">=</span><span class="n">tuning_metrics_overall_df</span><span class="p">,</span> <span class="n">metrics_per_timestamp_df</span><span class="o">=</span><span class="n">tuning_metrics_per_timestamp_df</span><span class="p">)</span>
+        
+        <span class="c1"># 2. Pick the best parameter set to minimise our given feature &amp; given metric (not specific to any timestamps)</span>
+        <span class="p">(</span><span class="n">min_errormetric_overall_value</span><span class="p">,</span> <span class="n">min_errormetric_overall_stderr</span><span class="p">,</span> <span class="n">optimal_param_dict</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span><span class="o">.</span><span class="n">get_optimal_params_overall</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_feature_name</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metric</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Optimal parameters for &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_feature_name</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metric</span> <span class="o">+</span> <span class="s1">&#39; = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_errormetric_overall_value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; +/- &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">min_errormetric_overall_stderr</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; are: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">optimal_param_dict</span><span class="p">))</span>
+        
+        <span class="c1"># 3. Fit over the entire input(X) and assign to self._fitted_predictor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to fit a predictor with the optimal parameters to the entire input dataset X=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+        <span class="n">predictor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predictor_template</span><span class="o">.</span><span class="n">get_deep_copy</span><span class="p">()</span> <span class="c1"># clone to avoid any problems</span>
+        <span class="n">predictor</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">parameter_dict</span> <span class="o">=</span> <span class="n">optimal_param_dict</span><span class="p">)</span> <span class="c1"># actually set the params</span>
+        <span class="n">predictor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span> <span class="o">=</span> <span class="n">predictor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Done fitting the inner predictor with optimal parameters to the entire input dataset: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span><span class="p">))</span>
+
+    
+    <span class="c1"># Implementation of the abstract method</span>
+    <span class="k">def</span> <span class="nf">_predictImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;This TuningPredictor must be fitted (i.e. tuned) before we can use it to predict!&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Y_hat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span><span class="o">.</span><span class="n">_predictImplementation</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Y_hat</span>
+
+    
+    <span class="c1"># Override of non-abstract method</span>
+<div class="viewcode-block" id="TuningOverallPredictor.compact"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningOverallPredictor.compact">[docs]</a>    <span class="k">def</span> <span class="nf">compact</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Compacting&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span><span class="o">.</span><span class="n">compact</span><span class="p">()</span></div>
+    
+        
+    <span class="c1"># Implementation of the abstract method.</span>
+<div class="viewcode-block" id="TuningOverallPredictor.get_deep_copy"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningOverallPredictor.get_deep_copy">[docs]</a>    <span class="k">def</span> <span class="nf">get_deep_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">TuningOverallPredictor</span><span class="p">(</span><span class="n">predictor_template</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_predictor_template</span><span class="p">,</span> <span class="n">parameter_iterator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameter_iterator</span><span class="p">,</span> <span class="n">scoring_feature_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_feature_name</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metric</span><span class="p">,</span> <span class="n">series_splitter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">fitted_predictor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span><span class="o">.</span><span class="n">get_deep_copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="c1"># a shallow copy is enough since this is immutable</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+       
+    
+    <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(predictor_template = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_predictor_template</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, parameter_iterator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameter_iterator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, scoring_feature_name = &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_feature_name</span> <span class="o">+</span> <span class="s1">&#39;, scoring_metric = &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metric</span> <span class="o">+</span> <span class="s1">&#39;, series_splitter = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, fitted_predictor = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitted_predictor</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span></div>
+    
+        
+        
+<div class="viewcode-block" id="TuningTimestampMultiplexerPredictor"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningTimestampMultiplexerPredictor">[docs]</a><span class="k">class</span> <span class="nc">TuningTimestampMultiplexerPredictor</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="c1"># Parameter list_predictor_template_parameter_iterator_tupes should be a 3-item tuple of the form (key, predictor_template, parameter_iterator)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_predictor_template_parameter_iterator_tupes</span><span class="p">,</span> <span class="n">scoring_feature_name</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="o">=</span><span class="s1">&#39;rmse&#39;</span><span class="p">,</span> <span class="n">series_splitter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TuningTimestampMultiplexerPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        
+        <span class="c1"># Validation, part 1</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">list_predictor_template_parameter_iterator_tupes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">list_predictor_template_parameter_iterator_tupes</span> <span class="o">=</span> <span class="p">[</span><span class="n">list_predictor_template_parameter_iterator_tupes</span><span class="p">]</span>
+        
+        <span class="n">list_all_template_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dict_key_to_predictor_templates</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">template_key</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="n">parameter_iterator</span><span class="p">)</span> <span class="ow">in</span> <span class="n">list_predictor_template_parameter_iterator_tupes</span><span class="p">:</span>
+            <span class="n">list_all_template_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">template_key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dict_key_to_predictor_templates</span><span class="p">[</span><span class="n">template_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictor_template</span>
+            
+        <span class="c1"># Validation, part 2</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_all_template_keys</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dict_key_to_predictor_templates</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;There is a duplicate template key specified within the list_predictor_template_parameter_iterator_tupes parameter!&#39;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_list_predictor_template_parameter_iterator_tupes</span> <span class="o">=</span> <span class="n">list_predictor_template_parameter_iterator_tupes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_feature_name</span> <span class="o">=</span> <span class="n">scoring_feature_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metric</span> <span class="o">=</span> <span class="n">scoring_metric</span>
+        
+        <span class="c1"># Default to 5-fold CV</span>
+        <span class="k">if</span> <span class="n">series_splitter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span> <span class="o">=</span> <span class="n">series_splitter</span>
+            
+        <span class="c1"># These will be set later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_optimal_predictors_by_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dict_timestamp_to_optimal_predictor_ids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span> <span class="o">=</span> <span class="kc">None</span>
+        
+<div class="viewcode-block" id="TuningTimestampMultiplexerPredictor.set_parameters"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningTimestampMultiplexerPredictor.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>          
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot call set_parameters on an TuningTimestampMultiplexerPredictor! parameter_dict = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">))</span></div>
+        
+    <span class="c1"># Implementation of the abstract method. </span>
+    <span class="c1"># Performs the nested cross-validation. Based on the parameters supplied, it decides whether to cross-validated for series and/or timestamps</span>
+    <span class="k">def</span> <span class="nf">_fitImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1"># 1. Do the nested cross-validation.</span>
+        
+        <span class="c1"># Perform the nondeterministic sampling (or deterministic grid iteration) and collect the results into a list of samples to allow reuse, for each tuple.</span>
+        <span class="n">list_expanded_param_vals</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span> <span class="n">template_key</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">parameter_iterator</span><span class="p">)</span> <span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">template_key</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="n">parameter_iterator</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_predictor_template_parameter_iterator_tupes</span> <span class="p">]</span>
+        <span class="n">list_expanded_param_vals_with_names</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span> <span class="n">template_key</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="n">param_vals_list</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">param_vals_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">template_key</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="n">param_vals_list</span><span class="p">)</span> <span class="ow">in</span> <span class="n">list_expanded_param_vals</span> <span class="p">]</span>
+        
+        <span class="c1"># Contains a dictionary of tuples pointing to lists:</span>
+        <span class="c1"># (template_key, param_dict, feature_name) -&gt; list of [ intermediate scoring results ]</span>
+        <span class="n">dict_template_key_params_and_feature_name_to_list_of_intermediate_scoring_results</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># First pass: for common resamples/folds/splits (to be fair in evaluating models against each other!),</span>
+        <span class="c1"># perform the actual fit &amp; predict and gather up intermediate ScoringResult objects for each (param_dict, feature) combo</span>
+        <span class="n">fold_counter</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">training_instance</span><span class="p">,</span> <span class="n">validation_instance</span><span class="p">)</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">generate_series_folds</span><span class="p">(</span><span class="n">series_splitter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Outer CV Loop. Fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Training = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">training_instance</span><span class="o">.</span><span class="n">_series_id_uniques</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; / Validation = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">validation_instance</span><span class="o">.</span><span class="n">_series_id_uniques</span><span class="p">))</span>
+            
+            <span class="n">template_counter</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">template_key</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="n">param_vals_list</span><span class="p">,</span> <span class="n">param_names</span><span class="p">)</span> <span class="ow">in</span> <span class="n">list_expanded_param_vals_with_names</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Within fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, started evaluating template_key &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">template_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_expanded_param_vals_with_names</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">template_key</span><span class="p">))</span>
+                
+                <span class="n">param_dict_counter</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">param_dict</span> <span class="ow">in</span> <span class="n">param_vals_list</span><span class="p">:</span>  
+                    <span class="c1"># Perform the fit &amp; score for this given fold of data and set ()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;For fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; + template_key &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">template_key</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, started evaluating param_dict &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">param_dict_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param_vals_list</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">param_dict</span><span class="p">))</span>
+                    <span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_template</span><span class="o">.</span><span class="n">get_deep_copy</span><span class="p">()</span> <span class="c1"># clone to avoid any problems</span>
+                    <span class="n">predictor</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">parameter_dict</span> <span class="o">=</span> <span class="n">param_dict</span><span class="p">)</span> <span class="c1"># actually set the params</span>
+                    <span class="n">predictor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">training_instance</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+                    <span class="n">scoring_results_for_multiple_features</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">validation_instance</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+                    <span class="c1"># For all individual results, construct error curves and cache them in a dictionary</span>
+                    <span class="k">for</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="n">scoring_results_for_multiple_features</span><span class="p">:</span>
+                        <span class="n">scoring_result</span> <span class="o">=</span> <span class="n">scoring_results_for_multiple_features</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span>
+                        <span class="c1">#scoring_result.err.visualise_per_timestamp(title=(&#39;INTERMEDIATE: fold &#39; + str(fold_counter)))</span>
+                        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">template_key</span><span class="p">,</span> <span class="n">FrozenDict</span><span class="p">(</span><span class="n">d</span><span class="o">=</span><span class="n">param_dict</span><span class="p">),</span> <span class="n">feature_name</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;First pass. key = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="n">dict_template_key_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">):</span>
+                            <span class="n">dict_template_key_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># initialise the list if not already there</span>
+                            <span class="n">dict_template_key_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scoring_result</span><span class="p">)</span>
+                    <span class="c1"># END: feature_name in scoring_results_for_multiple_features</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;For fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; + template_key &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">template_key</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, finished evaluating param_dict &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">param_dict_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param_vals_list</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">param_dict</span><span class="p">))</span>
+                    <span class="n">param_dict_counter</span> <span class="o">=</span> <span class="n">param_dict_counter</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="c1"># END: for param_dict in param_list</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Within fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, finished evaluating template_key &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">template_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_expanded_param_vals_with_names</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">template_key</span><span class="p">))</span>
+                <span class="n">template_counter</span> <span class="o">=</span> <span class="n">template_counter</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="c1"># END: for (template_key, predictor_template, param_vals_list, param_names) in list_expanded_param_vals_with_names:</span>
+                
+            <span class="n">fold_counter</span> <span class="o">=</span> <span class="n">fold_counter</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="c1"># END: for (training_instance, validation_instance) in X.generate_series_folds(series_splitter=self._series_splitter)</span>
+     
+        <span class="c1"># Second pass: for each (template_key, param_dict, feature) combo, compute a cross-validated error curve</span>
+        <span class="n">tuning_metrics_overall_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tuning_metrics_per_timestamp_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dict_template_key_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">:</span>
+            <span class="c1"># Retrieve the intermediate error curves and take their averages over all the CV folds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Second pass. key = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="n">intermediate_scoring_results</span> <span class="o">=</span> <span class="n">dict_template_key_params_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="p">(</span><span class="n">template_key</span><span class="p">,</span> <span class="n">param_dict</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="n">cv_err</span> <span class="o">=</span> <span class="n">ErrorCurve</span><span class="o">.</span><span class="n">init_from_multiple_error_curves</span><span class="p">(</span><span class="n">sequence_error_curves</span><span class="o">=</span><span class="p">[</span><span class="n">sr</span><span class="o">.</span><span class="n">err</span> <span class="k">for</span> <span class="n">sr</span> <span class="ow">in</span> <span class="n">intermediate_scoring_results</span><span class="p">])</span>
+            
+            <span class="c1"># Convert the results to a pair of DFs...</span>
+            <span class="c1"># Make sure that parameter values are stored as objects, to allow mixing of types and objects like lists!</span>
+            <span class="n">metrics_overall_df</span> <span class="o">=</span> <span class="n">cv_err</span><span class="o">.</span><span class="n">get_overall_metrics_as_dataframe</span><span class="p">()</span>
+            <span class="n">metrics_per_timestamp_df</span> <span class="o">=</span> <span class="n">cv_err</span><span class="o">.</span><span class="n">get_per_timestamp_metrics_as_dataframe</span><span class="p">()</span>
+            <span class="n">metrics_overall_df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_name</span>
+            <span class="n">metrics_overall_df</span><span class="p">[</span><span class="s1">&#39;predictor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">template_key</span>
+            <span class="n">metrics_per_timestamp_df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_name</span>
+            <span class="n">metrics_per_timestamp_df</span><span class="p">[</span><span class="s1">&#39;predictor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">template_key</span>        
+            <span class="k">for</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">param_dict</span><span class="p">:</span>
+                <span class="n">param_val</span> <span class="o">=</span> <span class="n">numpy_to_native</span><span class="p">(</span><span class="n">param_dict</span><span class="p">[</span><span class="n">param_name</span><span class="p">])</span>
+                <span class="n">metrics_overall_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics_overall_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">[</span> <span class="n">param_val</span> <span class="p">])</span>              <span class="c1"># this allows param_val to be a list</span>
+                <span class="n">metrics_overall_df</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics_overall_df</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>                              <span class="c1"># this is to allow mixtures of scalars and lists</span>
+                <span class="n">metrics_per_timestamp_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics_per_timestamp_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">[</span> <span class="n">param_val</span> <span class="p">])</span>  <span class="c1"># this allows param_val to be a list</span>
+                <span class="n">metrics_per_timestamp_df</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics_per_timestamp_df</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>                  <span class="c1"># this is to allow mixtures of scalars and lists</span>
+            <span class="c1"># ... and store them for later, knowing that they will be mismatched in terms of col names</span>
+            <span class="n">tuning_metrics_overall_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics_overall_df</span><span class="p">)</span>
+            <span class="n">tuning_metrics_per_timestamp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics_per_timestamp_df</span><span class="p">)</span>
+        <span class="c1"># END: for key in dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span>
+        
+        <span class="c1"># Concatenate the dataframes into a single list and wrap it all up in a container</span>
+        <span class="n">tuning_metrics_overall_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">tuning_metrics_overall_list</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">tuning_metrics_per_timestamp_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">tuning_metrics_per_timestamp_list</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="o">=</span> <span class="n">TuningMetrics</span><span class="p">(</span><span class="n">metrics_overall_df</span><span class="o">=</span><span class="n">tuning_metrics_overall_df</span><span class="p">,</span> <span class="n">metrics_per_timestamp_df</span><span class="o">=</span><span class="n">tuning_metrics_per_timestamp_df</span><span class="p">)</span>
+        
+        <span class="c1"># 2. Pick the best parameter set to minimise our given feature &amp; given metric (not specific to any timestamps)</span>
+        <span class="p">(</span><span class="n">best_predictors_and_params_df</span><span class="p">,</span> <span class="n">min_rows_per_timestamp_with_predictor_ids_df</span><span class="p">,</span> <span class="n">dict_timestamp_to_optimal_predictor_ids</span><span class="p">,</span> <span class="n">list_optimal_predictors_by_id</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span><span class="o">.</span><span class="n">get_optimal_predictors_and_params_per_timestamp</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_feature_name</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metric</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_optimal_predictors_by_id</span> <span class="o">=</span> <span class="n">list_optimal_predictors_by_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dict_timestamp_to_optimal_predictor_ids</span> <span class="o">=</span> <span class="n">dict_timestamp_to_optimal_predictor_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Optimal parameters per timestamp and their associated error metrics are as follows:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_predictors_and_params_df</span><span class="p">))</span>
+           
+        <span class="c1"># TODO: now that we have self.list_optimal_predictors_by_id - can we go through previous predictors and clear part of their memory by calling predictor.compact() ?</span>
+        
+        <span class="c1"># 3. Fit over the entire input(X) for each of predictor/parameter combinations</span>
+        <span class="n">count_optimal_predictors</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_optimal_predictors_by_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">count_optimal_predictors</span>
+        <span class="k">for</span> <span class="n">predictor_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count_optimal_predictors</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to fit predictor_id = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">predictor_id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; / &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">count_optimal_predictors</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the optimal parameters to the entire input dataset X=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+            <span class="p">(</span><span class="n">template_key</span><span class="p">,</span> <span class="n">optimal_param_dict</span><span class="p">)</span>  <span class="o">=</span> <span class="n">list_optimal_predictors_by_id</span><span class="p">[</span><span class="n">predictor_id</span><span class="p">]</span>
+            <span class="n">predictor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dict_key_to_predictor_templates</span><span class="p">[</span><span class="n">template_key</span><span class="p">]</span><span class="o">.</span><span class="n">get_deep_copy</span><span class="p">()</span> <span class="c1"># clone to avoid any problems</span>
+            <span class="n">predictor</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">parameter_dict</span> <span class="o">=</span> <span class="n">optimal_param_dict</span><span class="p">)</span> <span class="c1"># actually set the params</span>
+            <span class="n">predictor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span><span class="p">[</span><span class="n">predictor_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">predictor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Done fitting predictor_id = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">predictor_id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; / &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">count_optimal_predictors</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the optimal parameters to the entire input dataset X=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+           
+            
+    <span class="c1"># Implementation of the abstract method</span>
+    <span class="k">def</span> <span class="nf">_predictImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;This TuningTimestampMultiplexerPredictor must be fitted (i.e. tuned) before we can use it to predict!&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">count_fitted_optimal_predictors</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span><span class="p">)</span>
+            <span class="n">list_Y_hats_by_predictor_id</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">count_fitted_optimal_predictors</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count_fitted_optimal_predictors</span><span class="p">):</span>
+                <span class="n">fitted_predictor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to predict from predictor &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">count_fitted_optimal_predictors</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fitted_predictor</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">list_Y_hats_by_predictor_id</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fitted_predictor</span><span class="o">.</span><span class="n">_predictImplementation</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Done predicting from predictor &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">count_fitted_optimal_predictors</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fitted_predictor</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">list_a3d_vs_times</span> <span class="o">=</span> <span class="p">[</span><span class="n">Y_hat</span><span class="o">.</span><span class="n">select_arrays</span><span class="p">(</span><span class="n">include_time_as_feature</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">Y_hat</span> <span class="ow">in</span> <span class="n">list_Y_hats_by_predictor_id</span><span class="p">]</span>
+      
+            <span class="c1"># Make sure you remove other times, since the new_mutable_instance(..) method will not do that for you:</span>
+            <span class="n">multiplexed_Y_hat</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">subset_by_times</span><span class="p">(</span><span class="n">prediction_times</span><span class="p">)</span><span class="o">.</span><span class="n">new_mutable_instance</span><span class="p">(</span><span class="n">filter_value_colnames_vs_times</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+            <span class="p">(</span><span class="n">multiplexed_a3d_vs_times</span><span class="p">,</span> <span class="n">a2d_vs_series</span><span class="p">,</span> <span class="n">a1d_times</span><span class="p">)</span> <span class="o">=</span> <span class="n">multiplexed_Y_hat</span><span class="o">.</span><span class="n">select_arrays</span><span class="p">(</span><span class="n">include_time_as_feature</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">time_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prediction_times</span><span class="p">)):</span>
+                <span class="n">time_val</span> <span class="o">=</span> <span class="n">prediction_times</span><span class="p">[</span><span class="n">time_idx</span><span class="p">]</span>
+                <span class="n">optimal_predictor_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_timestamp_to_optimal_predictor_ids</span><span class="p">[</span><span class="n">time_val</span><span class="p">]</span>
+                <span class="n">predictor_a3d_vs_times</span> <span class="o">=</span> <span class="n">list_a3d_vs_times</span><span class="p">[</span><span class="n">optimal_predictor_id</span><span class="p">]</span> <span class="c1"># has shape (# series, # timestamps, # time_features)</span>
+                <span class="n">optimal_predictions_for_timestamp</span> <span class="o">=</span> <span class="n">predictor_a3d_vs_times</span><span class="p">[:,</span><span class="n">time_idx</span><span class="p">,:]</span>
+                <span class="n">multiplexed_a3d_vs_times</span><span class="p">[:,</span><span class="n">time_idx</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">optimal_predictions_for_timestamp</span>
+            
+            <span class="n">multiplexed_Y_hat</span><span class="o">.</span><span class="n">update_from_3d_array</span><span class="p">(</span><span class="n">times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">a3d_vs_times</span><span class="o">=</span><span class="n">multiplexed_a3d_vs_times</span><span class="p">,</span> <span class="n">value_colnames_vs_times</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">multiplexed_Y_hat</span>
+            
+
+    <span class="c1"># Implementation of the abstract method.</span>
+<div class="viewcode-block" id="TuningTimestampMultiplexerPredictor.get_deep_copy"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningTimestampMultiplexerPredictor.get_deep_copy">[docs]</a>    <span class="k">def</span> <span class="nf">get_deep_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">copy_list_predictor_template_parameter_iterator_tupes</span> <span class="o">=</span> <span class="p">[(</span><span class="n">template_key</span><span class="p">,</span> <span class="n">predictor_template</span><span class="o">.</span><span class="n">get_deep_copy</span><span class="p">(),</span> <span class="n">parameter_iterator</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">template_key</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="n">parameter_iterator</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_list_predictor_template_parameter_iterator_tupes</span><span class="p">]</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">TuningTimestampMultiplexerPredictor</span><span class="p">(</span><span class="n">list_predictor_template_parameter_iterator_tupes</span><span class="o">=</span><span class="n">copy_list_predictor_template_parameter_iterator_tupes</span><span class="p">,</span> <span class="n">scoring_feature_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_feature_name</span><span class="p">,</span> <span class="n">scoring_metric</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metric</span><span class="p">,</span> <span class="n">series_splitter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tuning_metrics</span> <span class="c1"># a shallow copy is enough since this is immutable</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_optimal_predictors_by_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">list_optimal_predictors_by_id</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_optimal_predictors_by_id</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_timestamp_to_optimal_predictor_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">dict_timestamp_to_optimal_predictor_ids</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_timestamp_to_optimal_predictor_ids</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">copy_list_fitted_optimal_predictors_by_id</span> <span class="o">=</span> <span class="p">[</span> <span class="n">predictor</span><span class="o">.</span><span class="n">get_deep_copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">predictor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span> <span class="p">]</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">list_fitted_optimal_predictors_by_id</span> <span class="o">=</span> <span class="n">copy_list_fitted_optimal_predictors_by_id</span>
+        
+        <span class="k">return</span> <span class="n">res</span></div>
+    
+        
+    <span class="c1"># Override of non-abstract method</span>
+<div class="viewcode-block" id="TuningTimestampMultiplexerPredictor.compact"><a class="viewcode-back" href="../../../index.html#pysf.predictors.tuning.TuningTimestampMultiplexerPredictor.compact">[docs]</a>    <span class="k">def</span> <span class="nf">compact</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Compacting&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_optimal_predictors_by_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">predictor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_optimal_predictors_by_id</span><span class="p">:</span>
+                <span class="n">predictor</span><span class="o">.</span><span class="n">compact</span><span class="p">()</span></div>
+
+            
+    <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_list_predictor_template_parameter_iterator_tupes</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; predictor/parameter tuples, scoring_feature_name = &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_feature_name</span> <span class="o">+</span> <span class="s1">&#39;, scoring_metric = &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scoring_metric</span> <span class="o">+</span> <span class="s1">&#39;, series_splitter = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_series_splitter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span></div>
+
+
+
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pysf 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ahmed Guecioueur.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

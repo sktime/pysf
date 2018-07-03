@@ -1,0 +1,1067 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pysf.predictors.framework &#8212; pysf 0.0.4 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pysf 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pysf.predictors.framework</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="kn">from</span> <span class="nn">..logger</span> <span class="k">import</span> <span class="n">LoggingHandler</span> 
+<span class="kn">from</span> <span class="nn">..data</span> <span class="k">import</span> <span class="n">MultiSeries</span>
+<span class="kn">from</span> <span class="nn">..errors</span> <span class="k">import</span> <span class="n">RawResiduals</span><span class="p">,</span> <span class="n">ErrorCurve</span>
+<span class="kn">from</span> <span class="nn">..transformers.framework</span> <span class="k">import</span> <span class="n">AbstractTransformer</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+
+
+
+<span class="c1"># Simple container to associate actual &amp; predicted values with the calculated error curve and raw residuals.</span>
+<div class="viewcode-block" id="ScoringResult"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.ScoringResult">[docs]</a><span class="k">class</span> <span class="nc">ScoringResult</span><span class="p">(</span><span class="n">LoggingHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">Y_true</span><span class="p">,</span> <span class="n">Y_hat</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="n">err</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ScoringResult</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Was expecting a str object for param feature_name! Instead was initialised with a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">Y_true</span><span class="p">)</span> <span class="o">!=</span> <span class="n">MultiSeries</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Was expecting a MultiSeries object for param Y_true! Instead was initialised with a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">Y_true</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">Y_hat</span><span class="p">)</span> <span class="o">!=</span> <span class="n">MultiSeries</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Was expecting a MultiSeries object for param Y_hat! Instead was initialised with a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">Y_hat</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span> <span class="o">!=</span> <span class="n">RawResiduals</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Was expecting a RawResiduals object for param residuals! Instead was initialised with a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">residuals</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">err</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ErrorCurve</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Was expecting an ErrorCurve object for param err! Instead was initialised with a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">err</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span> <span class="o">=</span> <span class="n">feature_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="n">residuals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">err</span> <span class="o">=</span> <span class="n">err</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y_true</span> <span class="o">=</span> <span class="n">Y_true</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y_hat</span> <span class="o">=</span> <span class="n">Y_hat</span>
+        
+    <span class="c1"># For serialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;residuals&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;err&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">err</span>
+        <span class="k">return</span> <span class="n">state_dict</span>
+        
+    <span class="c1"># For deserialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;residuals&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">err</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;err&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initLogger</span><span class="p">()</span></div>
+        
+        
+
+<div class="viewcode-block" id="AbstractPredictor"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor">[docs]</a><span class="k">class</span> <span class="nc">AbstractPredictor</span><span class="p">(</span><span class="n">ABC</span><span class="p">,</span> <span class="n">LoggingHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isFitted</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="AbstractPredictor.set_parameters"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor.set_parameters">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>      
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>    
+        <span class="k">pass</span></div>
+        
+<div class="viewcode-block" id="AbstractPredictor._setClassicEstimatorParams"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor._setClassicEstimatorParams">[docs]</a>    <span class="k">def</span> <span class="nf">_setClassicEstimatorParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classic_estimator</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">classic_estimator</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">parameter_dict</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Will not attempt to set any parameters: classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, parameter_dict = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">valid_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">given_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">parameter_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">invalid_keys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">given_keys</span><span class="p">,</span> <span class="n">valid_keys</span><span class="p">)</span>
+            <span class="n">parameter_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">invalid_keys</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">parameter_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">classic_estimator</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">parameter_dict</span><span class="p">)</span> <span class="c1"># The double-asterisk syntax tranforms the dict into (the required format of) keyword args</span></div>
+    
+<div class="viewcode-block" id="AbstractPredictor._enforceTypeMultiSeries"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor._enforceTypeMultiSeries">[docs]</a>    <span class="k">def</span> <span class="nf">_enforceTypeMultiSeries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramValue</span><span class="p">,</span> <span class="n">paramName</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">paramValue</span><span class="p">)</span> <span class="o">!=</span> <span class="n">MultiSeries</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected &#39;</span> <span class="o">+</span> <span class="n">paramName</span> <span class="o">+</span> <span class="s1">&#39; to be a MultiSeries but instead it was a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">paramValue</span><span class="p">)))</span></div>
+            
+<div class="viewcode-block" id="AbstractPredictor._enforceTimesShape"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor._enforceTimesShape">[docs]</a>    <span class="k">def</span> <span class="nf">_enforceTimesShape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">times</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the times parameter to be a 1D array but instead it had shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span></div>
+
+    <span class="c1"># X must be a MultiSeries</span>
+<div class="viewcode-block" id="AbstractPredictor.fit"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enforceTypeMultiSeries</span><span class="p">(</span><span class="n">paramValue</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">paramName</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitImplementation</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_isFitted</span> <span class="o">=</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="AbstractPredictor._fitImplementation"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor._fitImplementation">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_fitImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>   
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>       
+        <span class="k">pass</span></div>
+        
+    <span class="c1"># Returns a MultiSeries</span>
+    <span class="c1"># X must be a MultiSeries</span>
+    <span class="c1"># If prediction_features is specified, those named features will be predicted/scored, otherwise all applicable features will be.</span>
+<div class="viewcode-block" id="AbstractPredictor.predict"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enforceTypeMultiSeries</span><span class="p">(</span><span class="n">paramValue</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">paramName</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enforceTimesShape</span><span class="p">(</span><span class="n">times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isFitted</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predictImplementation</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;This instance has not been fitted yet. You need to fit any AbstractPredictor implementation before you can use it to predict!&#39;</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="AbstractPredictor._predictImplementation"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor._predictImplementation">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">_predictImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>          
+        <span class="k">pass</span></div>
+        
+    <span class="c1"># X must be a MultiSeries</span>
+    <span class="c1"># If prediction_features is specified, those named features will be predicted/scored individually, otherwise all applicable features will be.</span>
+    <span class="c1"># Return a ScoreResult.</span>
+<div class="viewcode-block" id="AbstractPredictor.score"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor.score">[docs]</a>    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Validation</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">prediction_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">prediction_features</span><span class="p">]</span> <span class="c1"># required</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enforceTypeMultiSeries</span><span class="p">(</span><span class="n">paramValue</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">paramName</span><span class="o">=</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enforceTimesShape</span><span class="p">(</span><span class="n">times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        
+        <span class="c1"># Do the prediction</span>
+        <span class="p">(</span><span class="n">Y_true</span><span class="p">,</span> <span class="n">X_input</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">split_by_times</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        <span class="n">Y_hat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        
+        <span class="n">total_obs_Y_true</span> <span class="o">=</span> <span class="n">Y_true</span><span class="o">.</span><span class="n">count_observations</span>
+        <span class="n">total_obs_Y_hat</span> <span class="o">=</span> <span class="n">Y_hat</span><span class="o">.</span><span class="n">count_observations</span>
+        <span class="k">if</span> <span class="n">total_obs_Y_true</span> <span class="o">!=</span> <span class="n">total_obs_Y_hat</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Y_true has &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_obs_Y_true</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; total observations but Y_hat has &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">total_obs_Y_hat</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; total observations.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">total_obs_Y_hat</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Y_hat = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Y_hat</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Y_hat._data_vs_times_df = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Y_hat</span><span class="o">.</span><span class="n">_data_vs_times_df</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No observations in Y_hat!&#39;</span><span class="p">)</span>
+            
+        <span class="c1"># Return a ScoringResult for each individual feature, collected into a dict</span>
+        <span class="n">dict_of_results</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">prediction_feature</span> <span class="ow">in</span> <span class="n">prediction_features</span><span class="p">:</span>
+            <span class="c1"># Calculate the error curve from the residuals, and return them together with MultiSeries for convenience.</span>
+            <span class="n">residuals</span> <span class="o">=</span> <span class="n">Y_true</span><span class="o">.</span><span class="n">get_raw_residuals</span><span class="p">(</span><span class="n">Y_hat</span><span class="o">=</span><span class="n">Y_hat</span><span class="p">,</span> <span class="n">value_colnames_vs_times_filter</span><span class="o">=</span><span class="n">prediction_feature</span><span class="p">)</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="n">ErrorCurve</span><span class="o">.</span><span class="n">init_from_raw_residuals</span><span class="p">(</span><span class="n">raw_residuals_obj</span><span class="o">=</span><span class="n">residuals</span><span class="p">)</span>
+            <span class="n">individual_result</span> <span class="o">=</span> <span class="n">ScoringResult</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="n">prediction_feature</span><span class="p">,</span> <span class="n">Y_true</span><span class="o">=</span><span class="n">Y_true</span><span class="p">,</span> <span class="n">Y_hat</span><span class="o">=</span><span class="n">Y_hat</span><span class="p">,</span> <span class="n">residuals</span><span class="o">=</span><span class="n">residuals</span><span class="p">,</span> <span class="n">err</span><span class="o">=</span><span class="n">err</span><span class="p">)</span>
+            <span class="n">dict_of_results</span><span class="p">[</span><span class="n">prediction_feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">individual_result</span>
+        <span class="k">return</span> <span class="n">dict_of_results</span></div>
+
+    <span class="c1"># Non-abstract method that by default does nothing. This will help us reduce memory leakage when performing large-scale experiments.    </span>
+<div class="viewcode-block" id="AbstractPredictor.compact"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor.compact">[docs]</a>    <span class="k">def</span> <span class="nf">compact</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+        
+    <span class="c1"># Make sure this is implemented at the very bottom of the inheritance tree! </span>
+    <span class="c1"># The reason we do this instead of copy.deepcopy is that the alternative fails, probably </span>
+    <span class="c1"># due to an implicit lock/mutex object buried within the logging package.</span>
+<div class="viewcode-block" id="AbstractPredictor.get_deep_copy"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor.get_deep_copy">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_deep_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>          
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+        
+    
+
+<div class="viewcode-block" id="PipelinePredictor"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.PipelinePredictor">[docs]</a><span class="k">class</span> <span class="nc">PipelinePredictor</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">):</span> 
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>         
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chain</span> <span class="o">=</span> <span class="p">[]):</span>  
+        <span class="nb">super</span><span class="p">(</span><span class="n">PipelinePredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="n">chain</span> <span class="o">=</span> <span class="p">[</span> <span class="n">chain</span> <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span> <span class="o">=</span> <span class="n">chain</span>
+        
+    <span class="c1"># Implementation of the abstract method.</span>
+<div class="viewcode-block" id="PipelinePredictor.set_parameters"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.PipelinePredictor.set_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>          
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Setting parameters &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; on &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
+            <span class="n">elem</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="n">parameter_dict</span> <span class="o">=</span> <span class="n">parameter_dict</span><span class="p">)</span></div>
+
+    <span class="c1"># Implementation of the abstract method.</span>
+<div class="viewcode-block" id="PipelinePredictor._fitImplementation"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.PipelinePredictor._fitImplementation">[docs]</a>    <span class="k">def</span> <span class="nf">_fitImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>          
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Fitting Element &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">),</span> <span class="n">AbstractTransformer</span><span class="p">):</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">),</span> <span class="n">AbstractPredictor</span><span class="p">):</span>
+                <span class="n">elem</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unrecognised type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span></div>
+        
+    <span class="c1"># Implementation of the abstract method.</span>
+<div class="viewcode-block" id="PipelinePredictor._predictImplementation"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.PipelinePredictor._predictImplementation">[docs]</a>    <span class="k">def</span> <span class="nf">_predictImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>            
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Predicting from Element &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">),</span> <span class="n">AbstractTransformer</span><span class="p">):</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">),</span> <span class="n">AbstractPredictor</span><span class="p">):</span>
+                <span class="n">X</span><span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unrecognised type &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">X</span></div>
+        
+    <span class="c1"># Override of non-abstract method</span>
+<div class="viewcode-block" id="PipelinePredictor.compact"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.PipelinePredictor.compact">[docs]</a>    <span class="k">def</span> <span class="nf">compact</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">elem</span><span class="p">),</span> <span class="n">AbstractPredictor</span><span class="p">):</span>
+                <span class="n">elem</span><span class="o">.</span><span class="n">compact</span><span class="p">()</span></div>
+            
+    <span class="c1"># Implementation of the abstract method.</span>
+<div class="viewcode-block" id="PipelinePredictor.get_deep_copy"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.PipelinePredictor.get_deep_copy">[docs]</a>    <span class="k">def</span> <span class="nf">get_deep_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">PipelinePredictor</span><span class="p">(</span><span class="n">chain</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span><span class="o">.</span><span class="n">get_deep_copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">])</span></div>
+        
+    <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;( &#39;</span> <span class="o">+</span> <span class="s1">&#39; ==&gt; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; )&#39;</span><span class="p">)</span></div>
+        
+
+    
+<span class="c1"># This works only with SKLearn Estimators conforming to the usual fit/predict pattern at the moment. </span>
+<span class="c1"># If it should be extended, then consider adding some more layers of abstraction/inheritance.</span>
+<span class="k">class</span> <span class="nc">SingleCurveSeriesPredictor</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SingleCurveSeriesPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span> <span class="o">=</span> <span class="n">classic_estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span> <span class="o">=</span> <span class="n">allow_missing_values</span>
+        
+        
+    <span class="k">def</span> <span class="nf">_enforceAtLeastOneInputFeature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">input_time_feature</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">input_non_time_features</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Need at least 1 input (covariate)! input_time_feature = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_time_feature</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, input_non_time_features = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="p">))</span>
+    
+            
+    <span class="c1"># Implementation of the abstract method. Simply passes the parameters through to the underlying sklearn estimator.</span>
+    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>          
+        <span class="k">if</span> <span class="n">parameter_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Passed a None parameter_dict&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Passing through the given parameter_dict &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; to the underlying sklearn estimator &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setClassicEstimatorParams</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="o">=</span><span class="n">parameter_dict</span><span class="p">)</span>
+            
+        
+    <span class="c1"># Implementation of the abstract method. Does nothing.</span>
+    <span class="k">def</span> <span class="nf">_fitImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1">#self._enforceAtLeastOneInputFeature(input_time_feature=input_time_feature, input_non_time_features=input_non_time_features)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Fit: do nothing&#39;</span><span class="p">)</span>
+        
+        
+    <span class="c1"># Overrideable method to call fit() on the classic estimator</span>
+    <span class="k">def</span> <span class="nf">_innerClassicFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a2d_X_fit</span><span class="p">,</span> <span class="n">a2d_Y_fit</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to call fit on the inner &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the X &amp; Y arrays having the shapes &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a2d_X_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a2d_Y_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; respectively.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">a2d_X_fit</span><span class="p">,</span> <span class="n">a2d_Y_fit</span><span class="p">)</span>
+          
+                          
+    <span class="c1"># Overrideable method to call predict() on the classic estimator</span>
+    <span class="k">def</span> <span class="nf">_innerClassicPredict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a2d_X_predict</span><span class="p">,</span> <span class="n">prediction_time_start_idx</span><span class="p">,</span> <span class="n">prediction_time_end_idx</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to call predict on the inner &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the X array having the shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a2d_X_predict</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">current_Y_hat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">a2d_X_predict</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Return value from calling predict on the inner &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; has the shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_Y_hat</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">current_Y_hat</span>
+        
+        
+    <span class="c1"># Implementation of the abstract method</span>
+    <span class="k">def</span> <span class="nf">_predictImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1"># Validation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enforceAtLeastOneInputFeature</span><span class="p">(</span><span class="n">input_time_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">)</span>
+        
+        <span class="c1"># Split the multicurves into a time region for single-curve fitting and a time region for single-curve prediction.</span>
+        <span class="p">(</span><span class="n">multicurves_for_singlecurve_predict</span><span class="p">,</span> <span class="n">multicurves_for_singlecurve_fit</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">split_by_times</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        
+        <span class="c1"># This is to help out ARIMA prediction, which relies on indices only. Assumes we&#39;re predicting forward, and not outside the whole range of X here:</span>
+        <span class="p">(</span><span class="n">prediction_time_start_idx</span><span class="p">,</span> <span class="n">prediction_time_end_idx</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">get_time_boundary_indices</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        
+        <span class="c1"># Each of these 3-D arrays has the shape (# series, # timestamps, # features)</span>
+        <span class="k">if</span> <span class="n">input_non_time_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="p">(</span><span class="n">a3d_X_fit</span><span class="p">,</span> <span class="n">train_times</span><span class="p">)</span>  <span class="o">=</span> <span class="n">multicurves_for_singlecurve_fit</span><span class="o">.</span><span class="n">select_merged_3d_array</span><span class="p">(</span>     <span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">a3d_Y_fit</span><span class="p">,</span> <span class="n">train_times</span><span class="p">)</span>  <span class="o">=</span> <span class="n">multicurves_for_singlecurve_fit</span><span class="o">.</span><span class="n">select_merged_3d_array</span><span class="p">(</span>     <span class="n">include_time_as_feature</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>              <span class="n">allow_missing_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">a3d_X_predict</span><span class="p">,</span> <span class="n">times</span><span class="p">)</span>    <span class="o">=</span> <span class="n">multicurves_for_singlecurve_predict</span><span class="o">.</span><span class="n">select_merged_3d_array</span><span class="p">(</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Within _predictImplementation(), input array shapes are as follows. For a3d_X_fit: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a3d_X_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, a3d_Y_fit: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a3d_Y_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, prediction_times: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prediction_times</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, a3d_X_predict: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a3d_X_predict</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        
+        <span class="c1"># Define a 3-D array of shape (# series, # timestamps, # features) to collect the results in. </span>
+        <span class="n">count_series</span> <span class="o">=</span> <span class="n">a3d_X_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># assume the # series is identical for all of the data arrays</span>
+        <span class="n">count_times</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prediction_times</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prediction_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">count_prediction_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">count_features</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">count_prediction_features</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">count_prediction_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="n">Y_hat_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">count_series</span><span class="p">,</span> <span class="n">count_times</span><span class="p">,</span> <span class="n">count_prediction_features</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Within _predictImplementation(), output array shape is as follows. For Y_hat_arr: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Y_hat_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        
+        <span class="c1"># Iterate through all curves, performing the internal SKLearn estimator&#39;s fit-predict on every single one.</span>
+        <span class="c1"># Sklearn&#39;s requirement of (n_samples, n_features) corresponds to our (#timestamps, #features), where #features may include the timestamp column</span>
+        <span class="k">for</span> <span class="n">series_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count_series</span><span class="p">):</span>
+            <span class="n">a2d_X_fit</span>     <span class="o">=</span> <span class="n">a3d_X_fit</span><span class="p">[</span><span class="n">series_idx</span><span class="p">,:,:]</span>
+            <span class="n">a2d_Y_fit</span>     <span class="o">=</span> <span class="n">a3d_Y_fit</span><span class="p">[</span><span class="n">series_idx</span><span class="p">,:,:]</span>
+            <span class="n">a2d_X_predict</span> <span class="o">=</span> <span class="n">a3d_X_predict</span><span class="p">[</span><span class="n">series_idx</span><span class="p">,:,:]</span>
+        
+            <span class="c1"># Call fit() and then predict() on the classic estimator for this single curve</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_innerClassicFit</span><span class="p">(</span><span class="n">a2d_X_fit</span><span class="o">=</span><span class="n">a2d_X_fit</span><span class="p">,</span> <span class="n">a2d_Y_fit</span><span class="o">=</span><span class="n">a2d_Y_fit</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+            <span class="n">current_Y_hat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_innerClassicPredict</span><span class="p">(</span><span class="n">a2d_X_predict</span><span class="o">=</span><span class="n">a2d_X_predict</span><span class="p">,</span> <span class="n">prediction_time_start_idx</span><span class="o">=</span><span class="n">prediction_time_start_idx</span><span class="p">,</span> <span class="n">prediction_time_end_idx</span><span class="o">=</span><span class="n">prediction_time_end_idx</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_Y_hat</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">current_Y_hat</span> <span class="o">=</span> <span class="n">current_Y_hat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># reshaping to have a single feature, SKLearn-style</span>
+            <span class="n">Y_hat_arr</span><span class="p">[</span><span class="n">series_idx</span><span class="p">,:,:]</span> <span class="o">=</span> <span class="n">current_Y_hat</span>
+
+        <span class="c1"># Convert result from 3D array to MultiSeries object</span>
+        <span class="n">Y_hat</span> <span class="o">=</span> <span class="n">multicurves_for_singlecurve_predict</span><span class="o">.</span><span class="n">new_instance_from_3d_array</span><span class="p">(</span><span class="n">a3d_vs_times</span><span class="o">=</span><span class="n">Y_hat_arr</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">value_colnames_vs_times</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Y_hat</span>
+
+        
+    <span class="c1"># Implementation of the abstract method.</span>
+    <span class="k">def</span> <span class="nf">get_deep_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SingleCurveSeriesPredictor</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">),</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span>
+       
+    
+    <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(_classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+    
+        
+        
+<span class="k">class</span> <span class="nc">AbstractMultiCurvePredictor</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractMultiCurvePredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">_checkAndCompleteInputNonTimeFeatures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1"># As well as any specifically-named features (if any) it should include the prediction features, in a union.</span>
+        <span class="k">if</span> <span class="n">input_non_time_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_non_time_features</span><span class="p">]</span>
+        
+        <span class="c1"># It would be more efficient to do this by union&#39;ing set operations, but operations like this should be deterministic in general:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prediction_features</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">input_non_time_features</span><span class="p">:</span>
+                <span class="n">input_non_time_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Determined input_non_time_features = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">input_non_time_features</span>
+        
+   
+        
+<span class="k">class</span> <span class="nc">AbstractWindowedPredictor</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="n">ParameterNameInputWindowWidth</span> <span class="o">=</span> <span class="s1">&#39;width_input&#39;</span>
+    <span class="n">ParameterNameOutputWindowWidth</span> <span class="o">=</span> <span class="s1">&#39;width_output&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractWindowedPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    
+    <span class="c1"># Implementation of the abstract method. Simply passes the parameters through to the underlying sklearn estimator.</span>
+    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>          
+        <span class="k">if</span> <span class="n">parameter_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Passed a None parameter_dict&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Copy the (mutable) dict so we can remove keys before passing the params through</span>
+            <span class="n">parameter_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">AbstractWindowedPredictor</span><span class="o">.</span><span class="n">ParameterNameInputWindowWidth</span> <span class="ow">in</span> <span class="n">parameter_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">width_input</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">[</span><span class="n">AbstractWindowedPredictor</span><span class="o">.</span><span class="n">ParameterNameInputWindowWidth</span><span class="p">])</span> <span class="c1"># explicitly cast to int</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Set self.width_input = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">))</span>
+                <span class="k">del</span> <span class="n">parameter_dict</span><span class="p">[</span><span class="n">AbstractWindowedPredictor</span><span class="o">.</span><span class="n">ParameterNameInputWindowWidth</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">AbstractWindowedPredictor</span><span class="o">.</span><span class="n">ParameterNameOutputWindowWidth</span> <span class="ow">in</span> <span class="n">parameter_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">width_output</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">[</span><span class="n">AbstractWindowedPredictor</span><span class="o">.</span><span class="n">ParameterNameOutputWindowWidth</span><span class="p">])</span> <span class="c1"># explicitly cast to int</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Set self.width_output = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">))</span>
+                <span class="k">del</span> <span class="n">parameter_dict</span><span class="p">[</span><span class="n">AbstractWindowedPredictor</span><span class="o">.</span><span class="n">ParameterNameOutputWindowWidth</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No remaining items in the updated parameter_dict, so no need to pass it to the inner SKlearn estimator&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Passing through the updated parameter_dict &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; to the underlying classic estimator &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_setClassicEstimatorParams</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="o">=</span><span class="n">parameter_dict</span><span class="p">)</span>
+                
+    <span class="k">def</span> <span class="nf">_checkWidthsAreSet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_input</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Both width_input and width_output parameters need to be set on &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">get_forward_sliding_windows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">max_window_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">sz</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">size</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="n">max_window_size</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">sz</span><span class="p">:</span>
+            <span class="n">sub_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">max_window_size</span><span class="p">)</span>
+            <span class="n">sub_vals</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">sub_indices</span><span class="p">]</span>
+            <span class="k">yield</span> <span class="n">sub_vals</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">max_window_size</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="n">sz</span><span class="p">:</span>
+            <span class="n">sub_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">sz</span><span class="p">)</span>
+            <span class="n">sub_vals</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[</span><span class="n">sub_indices</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Yielding an irregularly-shaped window with size &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sub_vals</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; and values &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sub_vals</span><span class="p">))</span>
+            <span class="k">yield</span> <span class="n">sub_vals</span>
+            
+    <span class="c1">#for s in get_forward_sliding_windows(arr=(np.arange(52)), max_window_size=7):</span>
+    <span class="c1">#    print(s)</span>
+    <span class="c1">#</span>
+    <span class="c1">#for s in get_forward_sliding_windows(arr=np.arange(301,366), max_window_size=2):</span>
+    <span class="c1">#    print(s)       </span>
+        
+    
+<span class="c1"># This works only with SKLearn Estimators conforming to the usual fit/predict pattern at the moment. </span>
+<span class="k">class</span> <span class="nc">MultiCurveTabularPredictor</span><span class="p">(</span><span class="n">AbstractMultiCurvePredictor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiCurveTabularPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span> <span class="o">=</span> <span class="n">classic_estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span> <span class="o">=</span> <span class="n">allow_missing_values</span>
+        
+    <span class="c1"># Implementation of the abstract method. Simply passes the parameters through to the underlying sklearn estimator.</span>
+    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>          
+        <span class="k">if</span> <span class="n">parameter_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Passed a None parameter_dict&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Passing through the given parameter_dict &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; to the underlying sklearn estimator &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_setClassicEstimatorParams</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="o">=</span><span class="n">parameter_dict</span><span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">_selectTabularArrayForFittingOrPredicting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">X_a2d</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_tabular_full_2d_array</span><span class="p">(</span><span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">include_time_as_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">value_colnames_filter</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="n">X_a2d</span>
+            
+    <span class="k">def</span> <span class="nf">_fitClassicEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_arr</span><span class="p">,</span> <span class="n">Y_arr</span><span class="p">):</span>
+        <span class="c1"># Fit the sklearn estimator with X in the shape of [n_samples,n_features] taking in our (# series, # times * # features)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to call fit on the inner &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the X &amp; Y arrays having the shapes &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Y_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; respectively.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_arr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Y_arr</span><span class="p">)</span> 
+                
+    <span class="c1"># Implementation of the abstract method</span>
+    <span class="k">def</span> <span class="nf">_fitImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1"># Validation</span>
+        <span class="k">if</span> <span class="n">prediction_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Must specify prediction_features!&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">prediction_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">prediction_features</span><span class="p">]</span> <span class="c1"># necessary</span>
+        <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAndCompleteInputNonTimeFeatures</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        
+        <span class="c1"># Split the multicurves into a time region for multi-curve fitting and a time region for multi-curve prediction.</span>
+        <span class="p">(</span><span class="n">Y_multiseries</span><span class="p">,</span> <span class="n">X_multiseries</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">split_by_times</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to fit to X = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X_multiseries</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &amp; Y = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Y_multiseries</span><span class="p">))</span>
+        
+        <span class="c1"># Convert (# series, # times, # features) to (#series, #times * #features) for both the X &amp; Y time regions:</span>
+        <span class="n">X_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectTabularArrayForFittingOrPredicting</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_multiseries</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span>  <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">)</span> 
+        <span class="n">Y_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectTabularArrayForFittingOrPredicting</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">Y_multiseries</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>               <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span> 
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitClassicEstimator</span><span class="p">(</span><span class="n">X_arr</span><span class="o">=</span><span class="n">X_arr</span><span class="p">,</span> <span class="n">Y_arr</span><span class="o">=</span><span class="n">Y_arr</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_predictFromClassicEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_arr</span><span class="p">):</span>
+        <span class="c1"># Do the multivariate prediction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to call predict on the inner &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the X array having the shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">Y_hat_a2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_arr</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="n">Y_hat_a2d</span>
+        
+    <span class="c1"># Implementation of the abstract method</span>
+    <span class="k">def</span> <span class="nf">_predictImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1"># Validation: check &amp; update input_non_time_features</span>
+        <span class="k">if</span> <span class="n">prediction_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Must specify prediction_features!&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">prediction_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">prediction_features</span><span class="p">]</span> <span class="c1"># necessary</span>
+        <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAndCompleteInputNonTimeFeatures</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+            
+        <span class="c1"># Split the multicurves into a time region for multi-curve fitting and a time region for multi-curve prediction.</span>
+        <span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">X_multiseries</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">split_by_times</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to predict from X = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X_multiseries</span><span class="p">))</span>
+        
+        <span class="c1"># Convert (# series, # times, # features) to (#series, #times * #features) for the X time region only:</span>
+        <span class="n">X_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectTabularArrayForFittingOrPredicting</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_multiseries</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span>  <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">)</span> 
+        
+        <span class="n">Y_hat_a2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predictFromClassicEstimator</span><span class="p">(</span><span class="n">X_arr</span><span class="o">=</span><span class="n">X_arr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Y_hat_a2d</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Possible to get back a simple array, thanks to sklearn!</span>
+            <span class="n">Y_hat_a2d</span> <span class="o">=</span> <span class="n">Y_hat_a2d</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">X_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Y_hat_a2d</span><span class="p">)</span> <span class="o">/</span> <span class="n">X_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        
+        <span class="c1"># Convert the result to a MultiSeries</span>
+        <span class="n">Y_hat</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">new_instance_from_2d_array</span><span class="p">(</span><span class="n">Y_a2d</span><span class="o">=</span><span class="n">Y_hat_a2d</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Y_hat</span>
+    
+    <span class="c1"># Implementation of the abstract method.</span>
+    <span class="k">def</span> <span class="nf">get_deep_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">MultiCurveTabularPredictor</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">),</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span>
+        
+    <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(_classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+    
+
+<span class="k">class</span> <span class="nc">MultiCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">AbstractMultiCurvePredictor</span><span class="p">,</span> <span class="n">AbstractWindowedPredictor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="n">ParameterNameTrainOverPredictionTimes</span> <span class="o">=</span> <span class="s1">&#39;train_over_prediction_times&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiCurveTabularWindowedPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span> <span class="o">=</span> <span class="n">classic_estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span> <span class="o">=</span> <span class="n">allow_missing_values</span>
+        <span class="c1"># Need to initialise to None to avoid breaking the deep copy while tuning an unparameterised instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width_input</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width_output</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_over_prediction_times</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">initWithAllParams</span><span class="p">(</span><span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="p">,</span> <span class="n">width_input</span><span class="p">,</span> <span class="n">width_output</span><span class="p">,</span> <span class="n">train_over_prediction_times</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">MultiCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">=</span><span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="n">allow_missing_values</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">width_input</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width_input</span><span class="p">)</span>       <span class="c1"># explicitly cast to int</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">width_output</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width_output</span><span class="p">)</span>     <span class="c1"># explicitly cast to int</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">train_over_prediction_times</span> <span class="o">=</span> <span class="n">train_over_prediction_times</span>
+        <span class="k">return</span> <span class="n">res</span>
+        
+    <span class="c1"># Implementation of the abstract method. Simply passes the parameters through to the underlying sklearn estimator.</span>
+    <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>          
+        <span class="k">if</span> <span class="n">parameter_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Passed a None parameter_dict&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Copy the (mutable) dict so we can remove keys before passing the params through</span>
+            <span class="n">parameter_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">MultiCurveTabularWindowedPredictor</span><span class="o">.</span><span class="n">ParameterNameTrainOverPredictionTimes</span> <span class="ow">in</span> <span class="n">parameter_dict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">train_over_prediction_times</span> <span class="o">=</span> <span class="n">parameter_dict</span><span class="p">[</span><span class="n">MultiCurveTabularWindowedPredictor</span><span class="o">.</span><span class="n">ParameterNameTrainOverPredictionTimes</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Set self.train_over_prediction_times = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_over_prediction_times</span><span class="p">))</span>
+                <span class="k">del</span> <span class="n">parameter_dict</span><span class="p">[</span><span class="n">MultiCurveTabularWindowedPredictor</span><span class="o">.</span><span class="n">ParameterNameTrainOverPredictionTimes</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;No remaining items in the updated parameter_dict, so no need to pass it up a level to the AbstractWindowedPredictor&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Passing up the updated parameter_dict &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">parameter_dict</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; to the overridden method in the parent AbstractWindowedPredictor.&#39;</span><span class="p">)</span>
+                <span class="n">AbstractWindowedPredictor</span><span class="o">.</span><span class="n">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">)</span> <span class="c1"># explicit-name version of super()</span>
+        
+    <span class="k">def</span> <span class="nf">_selectTabularWindowedArraysForFitting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">X_arr</span><span class="p">,</span> <span class="n">Y_arr</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_paired_tabular_windowed_2d_arrays</span><span class="p">(</span><span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">include_time_as_feature</span><span class="p">,</span>  <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">value_colnames_filter</span><span class="p">,</span>  <span class="n">allow_missing_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">,</span>  <span class="n">input_sliding_window_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">,</span> <span class="n">output_sliding_window_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X_arr</span><span class="p">,</span> <span class="n">Y_arr</span><span class="p">)</span>
+                
+    <span class="k">def</span> <span class="nf">_fitClassicEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_arr</span><span class="p">,</span> <span class="n">Y_arr</span><span class="p">):</span>
+        <span class="c1"># Fit the sklearn estimator with X in the shape of [n_samples,n_features] taking in our (# series, # times * # features)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to call fit on the inner &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the X &amp; Y arrays having the shapes &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Y_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; respectively.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_arr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Y_arr</span><span class="p">)</span> 
+        
+    <span class="c1"># Implementation of the abstract method</span>
+    <span class="k">def</span> <span class="nf">_fitImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1"># Validation</span>
+        <span class="k">if</span> <span class="n">prediction_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Must specify prediction_features!&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">prediction_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">prediction_features</span><span class="p">]</span> <span class="c1"># necessary</span>
+        <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAndCompleteInputNonTimeFeatures</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_checkWidthsAreSet</span><span class="p">()</span>
+        
+        <span class="c1"># Split the multicurves into a time region for multi-curve fitting and a time region for multi-curve prediction.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_over_prediction_times</span><span class="p">:</span>
+            <span class="n">X_train</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">X_prediction_times</span><span class="p">,</span> <span class="n">X_other_times</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">split_by_times</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+            <span class="n">X_train</span> <span class="o">=</span> <span class="n">X_other_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to fit to X_train = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X_train</span><span class="p">))</span>
+        
+        <span class="c1"># Convert (# series, # times, # features) to (#series * #splits, window_size * #time_features + #series_features) for both the X &amp; Y time regions:</span>
+        <span class="p">(</span><span class="n">X_arr</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectTabularWindowedArraysForFitting</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span>  <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">input_non_time_features</span>  <span class="p">)</span>
+        <span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Y_arr</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectTabularWindowedArraysForFitting</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>               <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">prediction_features</span>      <span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitClassicEstimator</span><span class="p">(</span><span class="n">X_arr</span><span class="o">=</span><span class="n">X_arr</span><span class="p">,</span> <span class="n">Y_arr</span><span class="o">=</span><span class="n">Y_arr</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_selectTabularArrayForPredicting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">X_a2d</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_tabular_full_2d_array</span><span class="p">(</span><span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">include_time_as_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">value_colnames_filter</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="n">X_a2d</span>
+     
+    <span class="k">def</span> <span class="nf">_predictFromClassicEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_arr</span><span class="p">):</span>
+        <span class="c1"># Do the multivariate prediction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to call predict on the inner &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the X array having the shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X_arr</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">Y_hat_a2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_arr</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="n">Y_hat_a2d</span>
+    
+    <span class="c1"># Implementation of the abstract method</span>
+    <span class="k">def</span> <span class="nf">_predictImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1"># Validation: check &amp; update input_non_time_features</span>
+        <span class="k">if</span> <span class="n">prediction_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Must specify prediction_features!&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">prediction_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">prediction_features</span><span class="p">]</span> <span class="c1"># necessary</span>
+        <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAndCompleteInputNonTimeFeatures</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_checkWidthsAreSet</span><span class="p">()</span>
+         
+        <span class="c1"># Split the multicurves into a time region for multi-curve fitting and a time region for multi-curve prediction.</span>
+        <span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">X_input</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">split_by_times</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to predict from X = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X_input</span><span class="p">))</span>
+        
+        <span class="c1"># Take a copy and re-index if necessary</span>
+        <span class="n">Y_hat</span> <span class="o">=</span> <span class="n">X_input</span><span class="o">.</span><span class="n">new_mutable_instance</span><span class="p">(</span><span class="n">filter_value_colnames_vs_times</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+            
+        <span class="k">for</span> <span class="n">prediction_times_subset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_forward_sliding_windows</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">max_window_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">):</span>
+            <span class="c1"># Combine this with predictions</span>
+            <span class="n">X_window</span> <span class="o">=</span> <span class="n">Y_hat</span><span class="o">.</span><span class="n">get_backward_time_window</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">)</span>
+            
+            <span class="c1"># Convert (# series, # times, # features) to (#series, #times * #features) for the X time region only:</span>
+            <span class="n">X_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectTabularArrayForPredicting</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_window</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">)</span>
+            
+            <span class="n">Y_hat_a2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predictFromClassicEstimator</span><span class="p">(</span><span class="n">X_arr</span><span class="o">=</span><span class="n">X_arr</span><span class="p">)</span> 
+            
+            <span class="c1"># Reshape to a 3D array. From (#series, #timestamps * # features)</span>
+            <span class="c1"># to (#series, #timestamps, #features)</span>
+            <span class="n">Y_hat_a3d</span> <span class="o">=</span> <span class="n">Y_hat_a2d</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Y_hat_a2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">))</span>
+            
+            <span class="c1"># Take a subset of the predicted timestamps to maintain them within the prediction_times range</span>
+            <span class="n">Y_hat_a3d</span> <span class="o">=</span> <span class="n">Y_hat_a3d</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prediction_times_subset</span><span class="p">)),</span> <span class="p">:]</span>
+            
+            <span class="c1"># Concatenate X_window + Y_hat_subset</span>
+            <span class="n">Y_hat</span><span class="o">.</span><span class="n">update_from_3d_array</span><span class="p">(</span><span class="n">a3d_vs_times</span><span class="o">=</span><span class="n">Y_hat_a3d</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">prediction_times_subset</span><span class="p">,</span> <span class="n">value_colnames_vs_times</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+            <span class="c1">#Y_hat_subset = X_window.new_instance_from_3d_array(a3d_vs_times=Y_hat_a3d, times=prediction_times_subset, value_colnames_vs_times=prediction_features)</span>
+            <span class="c1">#Y_hat.append(Y_hat_subset)</span>
+            
+        <span class="c1"># END for prediction_times_subset</span>
+        
+        <span class="c1"># Filter by times, if necessary, in case we have predicted too far into the future</span>
+        <span class="p">(</span><span class="n">Y_hat_filtered</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>  <span class="o">=</span> <span class="n">Y_hat</span><span class="o">.</span><span class="n">split_by_times</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">Y_hat_filtered</span><span class="o">.</span><span class="n">count_observations</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Y_hat_filtered</span><span class="o">.</span><span class="n">visualise</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;!!! Y_hat_filtered !!!&#39;</span><span class="p">)</span>
+            <span class="n">other</span><span class="o">.</span><span class="n">visualise</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;!!! other !!!&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;No observations in returned Y_hat_filtered &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Y_hat_filtered</span><span class="p">))</span>
+        
+        <span class="k">return</span> <span class="n">Y_hat_filtered</span>
+     
+    <span class="c1"># Implementation of the abstract method.</span>
+    <span class="k">def</span> <span class="nf">get_deep_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">MultiCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">),</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">width_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_input</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">width_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_output</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">train_over_prediction_times</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_over_prediction_times</span>
+        <span class="k">return</span> <span class="n">res</span>
+        
+        
+    <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(width_input = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;, width_output = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, _classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+         
+
+        
+        
+<span class="k">class</span> <span class="nc">SingleCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">AbstractMultiCurvePredictor</span><span class="p">,</span> <span class="n">AbstractWindowedPredictor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SingleCurveTabularWindowedPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span> <span class="o">=</span> <span class="n">classic_estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span> <span class="o">=</span> <span class="n">allow_missing_values</span>
+        <span class="c1"># Need to initialise to None to avoid breaking the deep copy while tuning an unparameterised instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width_input</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width_output</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">initWithAllParams</span><span class="p">(</span><span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="p">,</span> <span class="n">width_input</span><span class="p">,</span> <span class="n">width_output</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">SingleCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">=</span><span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="n">allow_missing_values</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">width_input</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width_input</span><span class="p">)</span>       <span class="c1"># explicitly cast to int</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">width_output</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">width_output</span><span class="p">)</span>     <span class="c1"># explicitly cast to int</span>
+        <span class="k">return</span> <span class="n">res</span>
+        
+    <span class="c1"># Implementation of the abstract method</span>
+    <span class="k">def</span> <span class="nf">_fitImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Fit: do nothing&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># The first dim. must be # series</span>
+    <span class="k">def</span> <span class="nf">_selectTabularWindowedArraysForFitting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">X_arr</span><span class="p">,</span> <span class="n">Y_arr</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_paired_tabular_windowed_3d_by_series_arrays</span><span class="p">(</span><span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">include_time_as_feature</span><span class="p">,</span>  <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">value_colnames_filter</span><span class="p">,</span>  <span class="n">allow_missing_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">,</span>  <span class="n">input_sliding_window_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">,</span> <span class="n">output_sliding_window_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X_arr</span><span class="p">,</span> <span class="n">Y_arr</span><span class="p">)</span>
+                    
+    <span class="c1"># The first dim. must be # series</span>
+    <span class="k">def</span> <span class="nf">_selectTabularArrayForPredicting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">X_a2d</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">select_tabular_full_2d_array</span><span class="p">(</span><span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">include_time_as_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">value_colnames_filter</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="n">X_a2d</span>
+        
+    <span class="c1"># Implementation of the abstract method</span>
+    <span class="k">def</span> <span class="nf">_predictImplementation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">prediction_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Must specify prediction_features!&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">prediction_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">prediction_features</span><span class="p">]</span> <span class="c1"># necessary</span>
+        <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkAndCompleteInputNonTimeFeatures</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_checkWidthsAreSet</span><span class="p">()</span>
+        
+        <span class="c1"># Split the multicurves into a time region for single-curve fitting and a time region for single-curve prediction.</span>
+        <span class="p">(</span><span class="n">multicurves_for_singlecurve_predict</span><span class="p">,</span> <span class="n">multicurves_for_singlecurve_fit</span><span class="p">)</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">split_by_times</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        
+        <span class="c1"># Convert (# series, # times, # features) to (#series, #splits, window_size * #time_features + #series_features) for both the X &amp; Y time regions:</span>
+        <span class="p">(</span><span class="n">arr_X_fit</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectTabularWindowedArraysForFitting</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">multicurves_for_singlecurve_fit</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span>  <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">arr_Y_fit</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectTabularWindowedArraysForFitting</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">multicurves_for_singlecurve_fit</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>               <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Within _predictImplementation(), input array shapes are as follows. For arr_X_fit: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">arr_X_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, arr_Y_fit: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">arr_Y_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, prediction_times: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prediction_times</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        
+        <span class="c1"># Take a copy and re-index if necessary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Will predict one-by-one from X = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">multicurves_for_singlecurve_fit</span><span class="p">))</span>
+        <span class="n">Y_hat</span> <span class="o">=</span> <span class="n">multicurves_for_singlecurve_fit</span><span class="o">.</span><span class="n">new_mutable_instance</span><span class="p">(</span><span class="n">filter_value_colnames_vs_times</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        
+        <span class="c1"># Iterate through all curves, performing the internal SKLearn estimator&#39;s fit-predict on every single one.</span>
+        <span class="c1"># Sklearn&#39;s requirement of (n_samples, n_features) corresponds to our (#splits, window_size * #time_features + #series_features).</span>
+        <span class="n">count_series</span> <span class="o">=</span> <span class="n">arr_X_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># assume the # series is identical for all of the data arrays</span>
+        <span class="k">for</span> <span class="n">series_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count_series</span><span class="p">):</span>
+            <span class="n">sub_arr_X_fit</span>     <span class="o">=</span> <span class="n">arr_X_fit</span><span class="p">[</span><span class="n">series_idx</span><span class="p">,:,:]</span>
+            <span class="n">sub_arr_Y_fit</span>     <span class="o">=</span> <span class="n">arr_Y_fit</span><span class="p">[</span><span class="n">series_idx</span><span class="p">,:,:]</span>
+        
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Iterating over series: series_idx = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">series_idx</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to call fit on the inner &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the X &amp; Y arrays having the shapes &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sub_arr_X_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sub_arr_Y_fit</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; respectively.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">sub_arr_X_fit</span><span class="p">,</span> <span class="n">sub_arr_Y_fit</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">prediction_times_subset</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_forward_sliding_windows</span><span class="p">(</span><span class="n">arr</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">max_window_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">):</span>
+            
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Iterating over output time windows: prediction_times_subset = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">prediction_times_subset</span><span class="p">))</span>
+                
+                <span class="c1"># Combine this with predictions</span>
+                <span class="n">X_window</span> <span class="o">=</span> <span class="n">Y_hat</span><span class="o">.</span><span class="n">get_backward_time_window</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">)</span>
+                
+                <span class="c1"># Convert (# series, # times, # features) to (#series, #times * #features) for the X time region only:</span>
+                <span class="n">arr_X_predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selectTabularArrayForPredicting</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_window</span><span class="p">,</span> <span class="n">include_time_as_feature</span><span class="o">=</span><span class="n">input_time_feature</span><span class="p">,</span> <span class="n">value_colnames_filter</span><span class="o">=</span><span class="n">input_non_time_features</span><span class="p">)</span>
+            
+                <span class="c1"># Filter for the current series</span>
+                <span class="n">X_a2d</span> <span class="o">=</span> <span class="n">arr_X_predict</span><span class="p">[</span><span class="n">series_idx</span><span class="p">,</span> <span class="p">:]</span>
+                
+                <span class="c1"># If necessary, reshape the 1-D array to a 2-D array representing a single sample</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_a2d</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">X_a2d</span> <span class="o">=</span> <span class="n">X_a2d</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                
+                <span class="c1"># Do the multivariate prediction</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;About to call predict on the inner &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; with the X array having the shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X_a2d</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+                <span class="n">Y_hat_a2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">X_a2d</span><span class="p">)</span> 
+                
+                <span class="c1"># Reshape to another 2D array form. </span>
+                <span class="c1"># From (#series == 1, #timestamps * # features) to (#timestamps, #features)</span>
+                <span class="n">Y_hat_a2d</span> <span class="o">=</span> <span class="n">Y_hat_a2d</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">prediction_features</span><span class="p">))</span>
+                
+                <span class="c1"># Take a subset of the predicted timestamps to maintain them within the prediction_times range</span>
+                <span class="n">Y_hat_a2d</span> <span class="o">=</span> <span class="n">Y_hat_a2d</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prediction_times_subset</span><span class="p">)),</span> <span class="p">:]</span>
+                
+                <span class="c1"># Concatenate X_window + Y_hat_subset</span>
+                <span class="n">Y_hat</span><span class="o">.</span><span class="n">update_from_2d_array</span><span class="p">(</span><span class="n">series_idx</span><span class="o">=</span><span class="n">series_idx</span><span class="p">,</span> <span class="n">a2d_vs_times</span><span class="o">=</span><span class="n">Y_hat_a2d</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">prediction_times_subset</span><span class="p">,</span> <span class="n">value_colnames_vs_times</span><span class="o">=</span><span class="n">prediction_features</span><span class="p">)</span>
+                
+            <span class="c1"># END for prediction_times_subset    </span>
+        <span class="c1"># END for series_idx</span>
+       
+        <span class="c1"># Filter by times, if necessary, in case we have predicted too far into the future</span>
+        <span class="p">(</span><span class="n">Y_hat_filtered</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>  <span class="o">=</span> <span class="n">Y_hat</span><span class="o">.</span><span class="n">split_by_times</span><span class="p">(</span><span class="n">given_times</span><span class="o">=</span><span class="n">prediction_times</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Y_hat_filtered</span>
+    
+    <span class="c1"># Implementation of the abstract method.</span>
+    <span class="k">def</span> <span class="nf">get_deep_copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">SingleCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">classic_estimator</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">),</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">width_input</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_input</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">width_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_output</span>
+        <span class="k">return</span> <span class="n">res</span>
+        
+    <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(width_input = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;, width_output = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, _classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+  
+
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pysf 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ahmed Guecioueur.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

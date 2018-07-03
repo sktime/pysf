@@ -1,0 +1,1258 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Welcome to pysf’s documentation! &#8212; pysf 0.0.4 documentation</title>
+    <link rel="stylesheet" href="_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">pysf 0.0.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to pysf’s documentation!</a></li>
+<li><a class="reference internal" href="#data-container">Data container</a></li>
+<li><a class="reference internal" href="#framework-for-predictors-transformers">Framework for predictors &amp; transformers</a></li>
+<li><a class="reference internal" href="#self-tuning-predictors">Self-tuning predictors</a></li>
+<li><a class="reference internal" href="#all-predictors-transformers">All predictors &amp; transformers</a></li>
+<li><a class="reference internal" href="#generalisation-error-estimation">Generalisation error estimation</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-pysf-s-documentation">
+<h1>Welcome to pysf’s documentation!<a class="headerlink" href="#welcome-to-pysf-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="data-container">
+<h1>Data container<a class="headerlink" href="#data-container" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pysf.data.MultiSeries">
+<em class="property">class </em><code class="descclassname">pysf.data.</code><code class="descname">MultiSeries</code><span class="sig-paren">(</span><em>time_colname</em>, <em>series_id_colnames</em>, <em>data_vs_times_df</em>, <em>data_vs_series_df=None</em>, <em>value_colnames_vs_times=None</em>, <em>value_colnames_vs_series=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="attribute">
+<dt id="pysf.data.MultiSeries.all_non_timestamp_feature_names">
+<code class="descname">all_non_timestamp_feature_names</code><a class="headerlink" href="#pysf.data.MultiSeries.all_non_timestamp_feature_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.data.MultiSeries.count_features">
+<code class="descname">count_features</code><a class="headerlink" href="#pysf.data.MultiSeries.count_features" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.data.MultiSeries.count_observations">
+<code class="descname">count_observations</code><a class="headerlink" href="#pysf.data.MultiSeries.count_observations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.generate_series_folds">
+<code class="descname">generate_series_folds</code><span class="sig-paren">(</span><em>series_splitter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.generate_series_folds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.generate_series_folds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Yields:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.generate_time_windows">
+<code class="descname">generate_time_windows</code><span class="sig-paren">(</span><em>time_splitter</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.generate_time_windows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.generate_time_windows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Yields:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.get_backward_time_window">
+<code class="descname">get_backward_time_window</code><span class="sig-paren">(</span><em>window_size</em>, <em>time_limit=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.get_backward_time_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.get_backward_time_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.get_forward_time_window">
+<code class="descname">get_forward_time_window</code><span class="sig-paren">(</span><em>window_size</em>, <em>time_limit=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.get_forward_time_window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.get_forward_time_window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.get_raw_residuals">
+<code class="descname">get_raw_residuals</code><span class="sig-paren">(</span><em>Y_hat</em>, <em>value_colnames_vs_times_filter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.get_raw_residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.get_raw_residuals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.get_time_boundary_indices">
+<code class="descname">get_time_boundary_indices</code><span class="sig-paren">(</span><em>given_times</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.get_time_boundary_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.get_time_boundary_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.new_instance_from_2d_array">
+<code class="descname">new_instance_from_2d_array</code><span class="sig-paren">(</span><em>Y_a2d</em>, <em>times</em>, <em>prediction_features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.new_instance_from_2d_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.new_instance_from_2d_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.new_instance_from_3d_array">
+<code class="descname">new_instance_from_3d_array</code><span class="sig-paren">(</span><em>times</em>, <em>a3d_vs_times</em>, <em>value_colnames_vs_times</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.new_instance_from_3d_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.new_instance_from_3d_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.new_mutable_instance">
+<code class="descname">new_mutable_instance</code><span class="sig-paren">(</span><em>filter_value_colnames_vs_times=None</em>, <em>prediction_times=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.new_mutable_instance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.new_mutable_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.select_arrays">
+<code class="descname">select_arrays</code><span class="sig-paren">(</span><em>include_time_as_feature=False</em>, <em>value_colnames_filter=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.select_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.select_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.select_merged_3d_array">
+<code class="descname">select_merged_3d_array</code><span class="sig-paren">(</span><em>include_time_as_feature=False</em>, <em>value_colnames_filter=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.select_merged_3d_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.select_merged_3d_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.select_paired_tabular_windowed_2d_arrays">
+<code class="descname">select_paired_tabular_windowed_2d_arrays</code><span class="sig-paren">(</span><em>input_sliding_window_size</em>, <em>output_sliding_window_size</em>, <em>include_time_as_feature=False</em>, <em>value_colnames_filter=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.select_paired_tabular_windowed_2d_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.select_paired_tabular_windowed_2d_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.select_paired_tabular_windowed_3d_by_series_arrays">
+<code class="descname">select_paired_tabular_windowed_3d_by_series_arrays</code><span class="sig-paren">(</span><em>input_sliding_window_size</em>, <em>output_sliding_window_size</em>, <em>include_time_as_feature=False</em>, <em>value_colnames_filter=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.select_paired_tabular_windowed_3d_by_series_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.select_paired_tabular_windowed_3d_by_series_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.select_paired_tabular_windowed_3d_by_time_arrays">
+<code class="descname">select_paired_tabular_windowed_3d_by_time_arrays</code><span class="sig-paren">(</span><em>input_sliding_window_size</em>, <em>output_sliding_window_size</em>, <em>include_time_as_feature=False</em>, <em>value_colnames_filter=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.select_paired_tabular_windowed_3d_by_time_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.select_paired_tabular_windowed_3d_by_time_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.select_paired_tabular_windowed_4d_arrays">
+<code class="descname">select_paired_tabular_windowed_4d_arrays</code><span class="sig-paren">(</span><em>input_sliding_window_size</em>, <em>output_sliding_window_size</em>, <em>include_time_as_feature=False</em>, <em>value_colnames_filter=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.select_paired_tabular_windowed_4d_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.select_paired_tabular_windowed_4d_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.select_paired_tabular_windowed_arrays">
+<code class="descname">select_paired_tabular_windowed_arrays</code><span class="sig-paren">(</span><em>input_sliding_window_size</em>, <em>output_sliding_window_size</em>, <em>include_time_as_feature=False</em>, <em>value_colnames_filter=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.select_paired_tabular_windowed_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.select_paired_tabular_windowed_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.select_tabular_full_2d_array">
+<code class="descname">select_tabular_full_2d_array</code><span class="sig-paren">(</span><em>include_time_as_feature=False</em>, <em>value_colnames_filter=None</em>, <em>allow_missing_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.select_tabular_full_2d_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.select_tabular_full_2d_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.split_by_times">
+<code class="descname">split_by_times</code><span class="sig-paren">(</span><em>given_times</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.split_by_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.split_by_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.subset_by_times">
+<code class="descname">subset_by_times</code><span class="sig-paren">(</span><em>given_times</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.subset_by_times"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.subset_by_times" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.update_from_2d_array">
+<code class="descname">update_from_2d_array</code><span class="sig-paren">(</span><em>series_idx</em>, <em>times</em>, <em>a2d_vs_times</em>, <em>value_colnames_vs_times=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.update_from_2d_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.update_from_2d_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.update_from_3d_array">
+<code class="descname">update_from_3d_array</code><span class="sig-paren">(</span><em>times</em>, <em>a3d_vs_times</em>, <em>value_colnames_vs_times</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.update_from_3d_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.update_from_3d_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.visualise">
+<code class="descname">visualise</code><span class="sig-paren">(</span><em>title=None</em>, <em>filter_value_colnames=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.visualise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.visualise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.visualise_arrays">
+<code class="descname">visualise_arrays</code><span class="sig-paren">(</span><em>include_time_as_feature=False</em>, <em>allow_missing_values=False</em>, <em>value_colnames_filter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.visualise_arrays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.visualise_arrays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="pysf.data.MultiSeries.visualise_external_2d_array">
+<em class="property">static </em><code class="descname">visualise_external_2d_array</code><span class="sig-paren">(</span><em>a2d</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.visualise_external_2d_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.visualise_external_2d_array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="pysf.data.MultiSeries.visualise_external_3d_array">
+<em class="property">static </em><code class="descname">visualise_external_3d_array</code><span class="sig-paren">(</span><em>a3d</em>, <em>times</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.visualise_external_3d_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.visualise_external_3d_array" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.data.MultiSeries.visualise_moments">
+<code class="descname">visualise_moments</code><span class="sig-paren">(</span><em>title=None</em>, <em>filter_value_colnames=None</em>, <em>stdev_bar_multiple=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/data.html#MultiSeries.visualise_moments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.data.MultiSeries.visualise_moments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="framework-for-predictors-transformers">
+<h1>Framework for predictors &amp; transformers<a class="headerlink" href="#framework-for-predictors-transformers" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pysf.predictors.framework.AbstractPredictor">
+<em class="property">class </em><code class="descclassname">pysf.predictors.framework.</code><code class="descname">AbstractPredictor</code><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="attribute">
+<dt id="pysf.predictors.framework.AbstractPredictor._abc_cache">
+<code class="descname">_abc_cache</code><em class="property"> = &lt;_weakrefset.WeakSet object&gt;</em><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor._abc_cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.predictors.framework.AbstractPredictor._abc_negative_cache">
+<code class="descname">_abc_negative_cache</code><em class="property"> = &lt;_weakrefset.WeakSet object&gt;</em><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor._abc_negative_cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.predictors.framework.AbstractPredictor._abc_negative_cache_version">
+<code class="descname">_abc_negative_cache_version</code><em class="property"> = 183</em><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor._abc_negative_cache_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.predictors.framework.AbstractPredictor._abc_registry">
+<code class="descname">_abc_registry</code><em class="property"> = &lt;_weakrefset.WeakSet object&gt;</em><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor._abc_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor._enforceTimesShape">
+<code class="descname">_enforceTimesShape</code><span class="sig-paren">(</span><em>times</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor._enforceTimesShape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor._enforceTimesShape" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor._enforceTypeMultiSeries">
+<code class="descname">_enforceTypeMultiSeries</code><span class="sig-paren">(</span><em>paramValue</em>, <em>paramName</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor._enforceTypeMultiSeries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor._enforceTypeMultiSeries" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor._fitImplementation">
+<code class="descname">_fitImplementation</code><span class="sig-paren">(</span><em>X</em>, <em>prediction_times</em>, <em>input_time_feature=True</em>, <em>input_non_time_features=None</em>, <em>prediction_features=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor._fitImplementation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor._fitImplementation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor._predictImplementation">
+<code class="descname">_predictImplementation</code><span class="sig-paren">(</span><em>X</em>, <em>prediction_times</em>, <em>input_time_feature=True</em>, <em>input_non_time_features=None</em>, <em>prediction_features=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor._predictImplementation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor._predictImplementation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor._setClassicEstimatorParams">
+<code class="descname">_setClassicEstimatorParams</code><span class="sig-paren">(</span><em>classic_estimator</em>, <em>parameter_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor._setClassicEstimatorParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor._setClassicEstimatorParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor.compact">
+<code class="descname">compact</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor.compact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor.compact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>X</em>, <em>prediction_times</em>, <em>input_time_feature=True</em>, <em>input_non_time_features=None</em>, <em>prediction_features=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor.get_deep_copy">
+<code class="descname">get_deep_copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor.get_deep_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor.get_deep_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor.predict">
+<code class="descname">predict</code><span class="sig-paren">(</span><em>X</em>, <em>prediction_times</em>, <em>input_time_feature=True</em>, <em>input_non_time_features=None</em>, <em>prediction_features=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor.score">
+<code class="descname">score</code><span class="sig-paren">(</span><em>X</em>, <em>prediction_times</em>, <em>input_time_feature=True</em>, <em>input_non_time_features=None</em>, <em>prediction_features=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor.score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.AbstractPredictor.set_parameters">
+<code class="descname">set_parameters</code><span class="sig-paren">(</span><em>parameter_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#AbstractPredictor.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.AbstractPredictor.set_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysf.predictors.framework.PipelinePredictor">
+<em class="property">class </em><code class="descclassname">pysf.predictors.framework.</code><code class="descname">PipelinePredictor</code><span class="sig-paren">(</span><em>chain=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#PipelinePredictor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="attribute">
+<dt id="pysf.predictors.framework.PipelinePredictor._abc_cache">
+<code class="descname">_abc_cache</code><em class="property"> = &lt;_weakrefset.WeakSet object&gt;</em><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor._abc_cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.predictors.framework.PipelinePredictor._abc_negative_cache">
+<code class="descname">_abc_negative_cache</code><em class="property"> = &lt;_weakrefset.WeakSet object&gt;</em><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor._abc_negative_cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.predictors.framework.PipelinePredictor._abc_negative_cache_version">
+<code class="descname">_abc_negative_cache_version</code><em class="property"> = 183</em><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor._abc_negative_cache_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.predictors.framework.PipelinePredictor._abc_registry">
+<code class="descname">_abc_registry</code><em class="property"> = &lt;_weakrefset.WeakSet object&gt;</em><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor._abc_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.PipelinePredictor._fitImplementation">
+<code class="descname">_fitImplementation</code><span class="sig-paren">(</span><em>X</em>, <em>prediction_times</em>, <em>input_time_feature=True</em>, <em>input_non_time_features=None</em>, <em>prediction_features=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#PipelinePredictor._fitImplementation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor._fitImplementation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.PipelinePredictor._predictImplementation">
+<code class="descname">_predictImplementation</code><span class="sig-paren">(</span><em>X</em>, <em>prediction_times</em>, <em>input_time_feature=True</em>, <em>input_non_time_features=None</em>, <em>prediction_features=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#PipelinePredictor._predictImplementation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor._predictImplementation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.PipelinePredictor.compact">
+<code class="descname">compact</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#PipelinePredictor.compact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor.compact" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.PipelinePredictor.get_deep_copy">
+<code class="descname">get_deep_copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#PipelinePredictor.get_deep_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor.get_deep_copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.framework.PipelinePredictor.set_parameters">
+<code class="descname">set_parameters</code><span class="sig-paren">(</span><em>parameter_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#PipelinePredictor.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.PipelinePredictor.set_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysf.errors.RawResiduals">
+<em class="property">class </em><code class="descclassname">pysf.errors.</code><code class="descname">RawResiduals</code><span class="sig-paren">(</span><em>residuals_raw</em>, <em>feature_colnames</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/errors.html#RawResiduals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.errors.RawResiduals" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="method">
+<dt id="pysf.errors.RawResiduals.visualise">
+<code class="descname">visualise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/errors.html#RawResiduals.visualise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.errors.RawResiduals.visualise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysf.errors.ErrorCurve">
+<em class="property">class </em><code class="descclassname">pysf.errors.</code><code class="descname">ErrorCurve</code><a class="reference internal" href="_modules/pysf/errors.html#ErrorCurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.errors.ErrorCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="method">
+<dt id="pysf.errors.ErrorCurve.get_overall_metrics_as_dataframe">
+<code class="descname">get_overall_metrics_as_dataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/errors.html#ErrorCurve.get_overall_metrics_as_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.errors.ErrorCurve.get_overall_metrics_as_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.errors.ErrorCurve.get_per_timestamp_metrics_as_dataframe">
+<code class="descname">get_per_timestamp_metrics_as_dataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/errors.html#ErrorCurve.get_per_timestamp_metrics_as_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.errors.ErrorCurve.get_per_timestamp_metrics_as_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="pysf.errors.ErrorCurve.init_from_multiple_error_curves">
+<em class="property">static </em><code class="descname">init_from_multiple_error_curves</code><span class="sig-paren">(</span><em>sequence_error_curves</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/errors.html#ErrorCurve.init_from_multiple_error_curves"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.errors.ErrorCurve.init_from_multiple_error_curves" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="pysf.errors.ErrorCurve.init_from_raw_residuals">
+<em class="property">static </em><code class="descname">init_from_raw_residuals</code><span class="sig-paren">(</span><em>raw_residuals_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/errors.html#ErrorCurve.init_from_raw_residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.errors.ErrorCurve.init_from_raw_residuals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.errors.ErrorCurve.visualise_overall">
+<code class="descname">visualise_overall</code><span class="sig-paren">(</span><em>title=None</em>, <em>metrics=None</em>, <em>stderr_bar_multiple=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/errors.html#ErrorCurve.visualise_overall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.errors.ErrorCurve.visualise_overall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.errors.ErrorCurve.visualise_per_timestamp">
+<code class="descname">visualise_per_timestamp</code><span class="sig-paren">(</span><em>title=None</em>, <em>metrics=None</em>, <em>stderr_bar_multiple=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/errors.html#ErrorCurve.visualise_per_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.errors.ErrorCurve.visualise_per_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysf.predictors.framework.ScoringResult">
+<em class="property">class </em><code class="descclassname">pysf.predictors.framework.</code><code class="descname">ScoringResult</code><span class="sig-paren">(</span><em>feature_name</em>, <em>Y_true</em>, <em>Y_hat</em>, <em>residuals</em>, <em>err</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/framework.html#ScoringResult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.framework.ScoringResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="pysf.transformers.framework.AbstractTransformer">
+<em class="property">class </em><code class="descclassname">pysf.transformers.framework.</code><code class="descname">AbstractTransformer</code><a class="reference internal" href="_modules/pysf/transformers/framework.html#AbstractTransformer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.transformers.framework.AbstractTransformer" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="attribute">
+<dt id="pysf.transformers.framework.AbstractTransformer._abc_cache">
+<code class="descname">_abc_cache</code><em class="property"> = &lt;_weakrefset.WeakSet object&gt;</em><a class="headerlink" href="#pysf.transformers.framework.AbstractTransformer._abc_cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.transformers.framework.AbstractTransformer._abc_negative_cache">
+<code class="descname">_abc_negative_cache</code><em class="property"> = &lt;_weakrefset.WeakSet object&gt;</em><a class="headerlink" href="#pysf.transformers.framework.AbstractTransformer._abc_negative_cache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.transformers.framework.AbstractTransformer._abc_negative_cache_version">
+<code class="descname">_abc_negative_cache_version</code><em class="property"> = 183</em><a class="headerlink" href="#pysf.transformers.framework.AbstractTransformer._abc_negative_cache_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pysf.transformers.framework.AbstractTransformer._abc_registry">
+<code class="descname">_abc_registry</code><em class="property"> = &lt;_weakrefset.WeakSet object&gt;</em><a class="headerlink" href="#pysf.transformers.framework.AbstractTransformer._abc_registry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.transformers.framework.AbstractTransformer.get_deep_copy">
+<code class="descname">get_deep_copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/transformers/framework.html#AbstractTransformer.get_deep_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.transformers.framework.AbstractTransformer.get_deep_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.transformers.framework.AbstractTransformer.set_parameters">
+<code class="descname">set_parameters</code><span class="sig-paren">(</span><em>parameter_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/transformers/framework.html#AbstractTransformer.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.transformers.framework.AbstractTransformer.set_parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.transformers.framework.AbstractTransformer.transform">
+<code class="descname">transform</code><span class="sig-paren">(</span><em>X</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/transformers/framework.html#AbstractTransformer.transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.transformers.framework.AbstractTransformer.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="self-tuning-predictors">
+<h1>Self-tuning predictors<a class="headerlink" href="#self-tuning-predictors" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pysf.predictors.tuning.TuningMetrics">
+<em class="property">class </em><code class="descclassname">pysf.predictors.tuning.</code><code class="descname">TuningMetrics</code><span class="sig-paren">(</span><em>metrics_overall_df</em>, <em>metrics_per_timestamp_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningMetrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningMetrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningMetrics._get_filtered_metrics_overall">
+<code class="descname">_get_filtered_metrics_overall</code><span class="sig-paren">(</span><em>metric</em>, <em>feature_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningMetrics._get_filtered_metrics_overall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningMetrics._get_filtered_metrics_overall" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningMetrics._get_filtered_metrics_per_timestamp">
+<code class="descname">_get_filtered_metrics_per_timestamp</code><span class="sig-paren">(</span><em>metric</em>, <em>feature_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningMetrics._get_filtered_metrics_per_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningMetrics._get_filtered_metrics_per_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningMetrics.boxplot_errors_by_single_param">
+<code class="descname">boxplot_errors_by_single_param</code><span class="sig-paren">(</span><em>param_name</em>, <em>feature_name</em>, <em>metric='rmse'</em>, <em>title=None</em>, <em>convert_param_values_to_string=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningMetrics.boxplot_errors_by_single_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningMetrics.boxplot_errors_by_single_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningMetrics.get_optimal_params_overall">
+<code class="descname">get_optimal_params_overall</code><span class="sig-paren">(</span><em>feature_name</em>, <em>metric='rmse'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningMetrics.get_optimal_params_overall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningMetrics.get_optimal_params_overall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningMetrics.get_optimal_predictors_and_params_per_timestamp">
+<code class="descname">get_optimal_predictors_and_params_per_timestamp</code><span class="sig-paren">(</span><em>feature_name</em>, <em>metric='rmse'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningMetrics.get_optimal_predictors_and_params_per_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningMetrics.get_optimal_predictors_and_params_per_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningMetrics.visualise_minimum_errors">
+<code class="descname">visualise_minimum_errors</code><span class="sig-paren">(</span><em>feature_name</em>, <em>metric='rmse'</em>, <em>filter_param_names=None</em>, <em>stderr_bar_multiple=1</em>, <em>title=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningMetrics.visualise_minimum_errors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningMetrics.visualise_minimum_errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysf.predictors.tuning.TuningOverallPredictor">
+<em class="property">class </em><code class="descclassname">pysf.predictors.tuning.</code><code class="descname">TuningOverallPredictor</code><span class="sig-paren">(</span><em>predictor_template</em>, <em>parameter_iterator</em>, <em>scoring_feature_name</em>, <em>scoring_metric='rmse'</em>, <em>series_splitter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningOverallPredictor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningOverallPredictor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningOverallPredictor.compact">
+<code class="descname">compact</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningOverallPredictor.compact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningOverallPredictor.compact" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningOverallPredictor.get_deep_copy">
+<code class="descname">get_deep_copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningOverallPredictor.get_deep_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningOverallPredictor.get_deep_copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningOverallPredictor.set_parameters">
+<code class="descname">set_parameters</code><span class="sig-paren">(</span><em>parameter_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningOverallPredictor.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningOverallPredictor.set_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysf.predictors.tuning.TuningTimestampMultiplexerPredictor">
+<em class="property">class </em><code class="descclassname">pysf.predictors.tuning.</code><code class="descname">TuningTimestampMultiplexerPredictor</code><span class="sig-paren">(</span><em>list_predictor_template_parameter_iterator_tupes</em>, <em>scoring_feature_name</em>, <em>scoring_metric='rmse'</em>, <em>series_splitter=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningTimestampMultiplexerPredictor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningTimestampMultiplexerPredictor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningTimestampMultiplexerPredictor.compact">
+<code class="descname">compact</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningTimestampMultiplexerPredictor.compact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningTimestampMultiplexerPredictor.compact" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningTimestampMultiplexerPredictor.get_deep_copy">
+<code class="descname">get_deep_copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningTimestampMultiplexerPredictor.get_deep_copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningTimestampMultiplexerPredictor.get_deep_copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.predictors.tuning.TuningTimestampMultiplexerPredictor.set_parameters">
+<code class="descname">set_parameters</code><span class="sig-paren">(</span><em>parameter_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/predictors/tuning.html#TuningTimestampMultiplexerPredictor.set_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.predictors.tuning.TuningTimestampMultiplexerPredictor.set_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="all-predictors-transformers">
+<h1>All predictors &amp; transformers<a class="headerlink" href="#all-predictors-transformers" title="Permalink to this headline">¶</a></h1>
+<p># TODO: Add this in later
+#.. inheritance-diagram:: pysf.predictors.tuning.TuningOverallPredictor  pysf.predictors.tuning.TuningTimestampMultiplexerPredictor pysf.predictors.forest.MultiCurveRandomForestPredictor pysf.predictors.kernels.MultiCurveKernelsPredictor pysf.predictors.framework.SingleCurveSeriesPredictor pysf.predictors.framework.MultiCurveTabularPredictor pysf.predictors.framework.MultiCurveTabularWindowedPredictor pysf.predictors.framework.SingleCurveTabularWindowedPredictor pysf.predictors.baselines.SeriesLinearInterpolator pysf.predictors.baselines.ZeroPredictor pysf.predictors.baselines.SeriesMeansPredictor pysf.predictors.baselines.TimestampMeansPredictor pysf.transformers.framework.AbstractTransformer pysf.transformers.smoothing.SmoothingSplineTransformer pysf.predictors.lstm.MultiCurveWindowedLstmPredictor</p>
+</div>
+<div class="section" id="generalisation-error-estimation">
+<h1>Generalisation error estimation<a class="headerlink" href="#generalisation-error-estimation" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="pysf.generalisation.Target">
+<em class="property">class </em><code class="descclassname">pysf.generalisation.</code><code class="descname">Target</code><span class="sig-paren">(</span><em>data</em>, <em>predictor_template</em>, <em>input_time_column</em>, <em>input_value_colnames</em>, <em>output_value_colnames</em>, <em>description=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#Target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.Target" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="method">
+<dt id="pysf.generalisation.Target.get_friendly_key">
+<code class="descname">get_friendly_key</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#Target.get_friendly_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.Target.get_friendly_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.Target.get_verbose_fields">
+<code class="descname">get_verbose_fields</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#Target.get_verbose_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.Target.get_verbose_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator">
+<em class="property">class </em><code class="descclassname">pysf.generalisation.</code><code class="descname">GeneralisationPerformanceEvaluator</code><span class="sig-paren">(</span><em>data</em>, <em>prediction_times</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator" title="Permalink to this definition">¶</a></dt>
+<dd><p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>attr1 (str): Description of <cite>attr1</cite>.
+attr2 (<code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional): Description of <cite>attr2</cite>.</dd>
+</dl>
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.add_to_targets">
+<code class="descname">add_to_targets</code><span class="sig-paren">(</span><em>predictor_templates</em>, <em>combos_of_input_time_column</em>, <em>combos_of_input_value_colnames</em>, <em>combos_of_output_value_colnames</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.add_to_targets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.add_to_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.calculate_second_pass">
+<code class="descname">calculate_second_pass</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.calculate_second_pass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.calculate_second_pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.chart_overall_performance">
+<code class="descname">chart_overall_performance</code><span class="sig-paren">(</span><em>feature_name</em>, <em>metric='rmse'</em>, <em>best_n_results=None</em>, <em>stderr_bar_multiple=1</em>, <em>figsize=None</em>, <em>func_update_description_strings=None</em>, <em>color_non_baseline='C0'</em>, <em>color_baseline='C3'</em>, <em>baseline_regular_expression='Baseline'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.chart_overall_performance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.chart_overall_performance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.chart_per_timestamp_performance">
+<code class="descname">chart_per_timestamp_performance</code><span class="sig-paren">(</span><em>feature_name</em>, <em>metric='rmse'</em>, <em>best_n_overall_results=None</em>, <em>stderr_bar_multiple=1</em>, <em>errorevery=1</em>, <em>func_update_description_strings=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.chart_per_timestamp_performance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.chart_per_timestamp_performance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>series_splitter=None</em>, <em>chart_intermediate_results=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.get_best_n_overall_results">
+<code class="descname">get_best_n_overall_results</code><span class="sig-paren">(</span><em>feature_name</em>, <em>best_n_results</em>, <em>metric='rmse'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.get_best_n_overall_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.get_best_n_overall_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.get_friendly_tgts_keys">
+<code class="descname">get_friendly_tgts_keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.get_friendly_tgts_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.get_friendly_tgts_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.get_intermediate_scoring_results">
+<code class="descname">get_intermediate_scoring_results</code><span class="sig-paren">(</span><em>tgt_friendly_key</em>, <em>scoring_feature_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.get_intermediate_scoring_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.get_intermediate_scoring_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.get_intermediate_tuning_metrics">
+<code class="descname">get_intermediate_tuning_metrics</code><span class="sig-paren">(</span><em>tgt_friendly_key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.get_intermediate_tuning_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.get_intermediate_tuning_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.get_sorted_overall_results">
+<code class="descname">get_sorted_overall_results</code><span class="sig-paren">(</span><em>feature_name</em>, <em>metric='rmse'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.get_sorted_overall_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.get_sorted_overall_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysf.generalisation.GeneralisationPerformanceEvaluator.to_csv">
+<code class="descname">to_csv</code><span class="sig-paren">(</span><em>parent_dirpath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pysf/generalisation.html#GeneralisationPerformanceEvaluator.to_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysf.generalisation.GeneralisationPerformanceEvaluator.to_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class methods are similar to regular functions.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>param1: The first parameter.
+param2: The second parameter.</dd>
+<dt>Returns:</dt>
+<dd>True if successful, False otherwise.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pysf"></span></div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">pysf 0.0.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ahmed Guecioueur.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

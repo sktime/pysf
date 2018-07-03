@@ -1,0 +1,805 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pysf.generalisation &#8212; pysf 0.0.4 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pysf 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pysf.generalisation</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="kn">from</span> <span class="nn">.logger</span> <span class="k">import</span> <span class="n">LoggingHandler</span> 
+<span class="kn">from</span> <span class="nn">.data</span> <span class="k">import</span> <span class="n">MultiSeries</span>
+<span class="kn">from</span> <span class="nn">.predictors.framework</span> <span class="k">import</span> <span class="n">AbstractPredictor</span>
+<span class="kn">from</span> <span class="nn">.predictors.tuning</span> <span class="k">import</span> <span class="n">TuningOverallPredictor</span><span class="p">,</span> <span class="n">TuningTimestampMultiplexerPredictor</span>
+<span class="kn">from</span> <span class="nn">.errors</span> <span class="k">import</span> <span class="n">ErrorCurve</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">get_friendly_list_string</span><span class="p">,</span> <span class="n">from_pickle</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="k">import</span> <span class="n">KFold</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+
+
+<span class="k">def</span> <span class="nf">combine_evaluators</span><span class="p">(</span><span class="n">list_of_input_tupes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is an example of a module level function.</span>
+<span class="sd">    Function parameters should be documented in the ``Args`` section. The name</span>
+<span class="sd">    of each parameter is required. The type and description of each parameter</span>
+<span class="sd">    is optional, but should be included if not obvious.</span>
+<span class="sd">    Parameter types -- if given -- should be specified according to</span>
+<span class="sd">    `PEP 484`_, though `PEP 484`_ conformance isn&#39;t required or enforced.</span>
+<span class="sd">    If \*args or \*\*kwargs are accepted,</span>
+<span class="sd">    they should be listed as ``*args`` and ``**kwargs``.</span>
+<span class="sd">    The format for a parameter is::</span>
+<span class="sd">        name (type): description</span>
+<span class="sd">            The description may span multiple lines. Following</span>
+<span class="sd">            lines should be indented. The &quot;(type)&quot; is optional.</span>
+<span class="sd">            Multiple paragraphs are supported in parameter</span>
+<span class="sd">            descriptions.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (int): The first parameter.</span>
+<span class="sd">        param2 (Optional[str]): The second parameter. Defaults to None.</span>
+<span class="sd">            Second line of description should be indented.</span>
+<span class="sd">        *args: Variable length argument list.</span>
+<span class="sd">        **kwargs: Arbitrary keyword arguments.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if successful, False otherwise.</span>
+<span class="sd">        The return type is optional and may be specified at the beginning of</span>
+<span class="sd">        the ``Returns`` section followed by a colon.</span>
+<span class="sd">        The ``Returns`` section may span multiple lines and paragraphs.</span>
+<span class="sd">        Following lines should be indented to match the first line.</span>
+<span class="sd">        The ``Returns`` section supports any reStructuredText formatting,</span>
+<span class="sd">        including literal blocks::</span>
+<span class="sd">            {</span>
+<span class="sd">                &#39;param1&#39;: param1,</span>
+<span class="sd">                &#39;param2&#39;: param2</span>
+<span class="sd">            }</span>
+<span class="sd">    Raises:</span>
+<span class="sd">        AttributeError: The ``Raises`` section is a list of all exceptions</span>
+<span class="sd">            that are relevant to the interface.</span>
+<span class="sd">        ValueError: If `param2` is equal to `param1`.</span>
+<span class="sd">    .. _PEP 484:</span>
+<span class="sd">       https://www.python.org/dev/peps/pep-0484/</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">GeneralisationPerformanceEvaluator</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">evaluator_filepath</span><span class="p">,</span> <span class="n">friendly_keys</span><span class="p">)</span> <span class="ow">in</span> <span class="n">list_of_input_tupes</span><span class="p">:</span>
+        <span class="n">evaluator</span> <span class="o">=</span> <span class="n">from_pickle</span><span class="p">(</span><span class="n">evaluator_filepath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">friendly_keys</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">friendly_keys</span> <span class="o">=</span> <span class="p">[</span> <span class="n">friendly_keys</span> <span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">tgt</span><span class="p">,</span> <span class="n">scoring_field</span><span class="p">)</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="n">tfk</span> <span class="o">=</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get_friendly_key</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">tfk</span> <span class="ow">in</span> <span class="n">friendly_keys</span><span class="p">:</span>
+                <span class="c1">#print(tgt)</span>
+                <span class="n">val_list</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val_list</span>
+        <span class="k">for</span> <span class="n">tgt</span> <span class="ow">in</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="p">:</span>
+            <span class="n">tfk</span> <span class="o">=</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get_friendly_key</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">tfk</span> <span class="ow">in</span> <span class="n">friendly_keys</span><span class="p">:</span>
+                <span class="c1">#print(tgt)</span>
+                <span class="n">val_list</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="p">[</span><span class="n">tgt</span><span class="p">]</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="p">[</span><span class="n">tgt</span><span class="p">]</span> <span class="o">=</span> <span class="n">val_list</span>
+    <span class="c1"># END for (evaluator_filepath, friendly_keys) in list_of_input_tupes</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">calculate_second_pass</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">res</span>
+                
+    
+    
+<div class="viewcode-block" id="Target"><a class="viewcode-back" href="../../index.html#pysf.generalisation.Target">[docs]</a><span class="k">class</span> <span class="nc">Target</span><span class="p">(</span><span class="n">LoggingHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="n">input_time_column</span><span class="p">,</span> <span class="n">input_value_colnames</span><span class="p">,</span> <span class="n">output_value_colnames</span><span class="p">,</span> <span class="n">description</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        
+        <span class="c1"># Validation</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">MultiSeries</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the data parameter to be a MultiSeries object! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">predictor_template</span><span class="p">),</span> <span class="n">AbstractPredictor</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the predictor_template parameter to be a subclass of AbstractPredictor! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">predictor_template</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">predictor_template</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; with covariate/s &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_value_colnames</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; and response/s &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">output_value_colnames</span><span class="p">)</span>
+            
+        <span class="c1"># Setting public fields</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_time_column</span> <span class="o">=</span> <span class="n">input_time_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_value_colnames</span> <span class="o">=</span> <span class="n">input_value_colnames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_value_colnames</span> <span class="o">=</span> <span class="n">output_value_colnames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        
+        <span class="c1"># Special case for the predictor public field: clone it from the predictor_template parameter, so that there is a unique fittable instance per target.</span>
+        <span class="c1"># (If we end up fitting/predicting in parallel, then we&#39;ll have to do more cloning than this...)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor_template</span><span class="o">.</span><span class="n">get_deep_copy</span><span class="p">()</span>  <span class="c1"># deep clone</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Initialised &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        
+<div class="viewcode-block" id="Target.get_verbose_fields"><a class="viewcode-back" href="../../index.html#pysf.generalisation.Target.get_verbose_fields">[docs]</a>    <span class="k">def</span> <span class="nf">get_verbose_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_value_colnames</span>
+        <span class="k">if</span> <span class="n">inputs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">inputs</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_time_column</span><span class="p">:</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">inputs</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_value_colnames</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">outputs</span><span class="p">]</span>
+        <span class="n">prediction_inputs</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">prediction_outputs</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="n">verbose_inputs_to_outputs</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction_inputs</span> <span class="o">+</span> <span class="s1">&#39; -&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)[</span><span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">prediction_outputs</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">prediction_inputs</span><span class="p">,</span> <span class="n">prediction_outputs</span><span class="p">,</span> <span class="n">verbose_inputs_to_outputs</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Target.get_friendly_key"><a class="viewcode-back" href="../../index.html#pysf.generalisation.Target.get_friendly_key">[docs]</a>    <span class="k">def</span> <span class="nf">get_friendly_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_time_column</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">get_friendly_list_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_value_colnames</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">get_friendly_list_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_value_colnames</span><span class="p">))</span></div>
+        
+    <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">+</span> <span class="s1">&#39;. Use time as Covariate: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_time_column</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;. Non-time Covariates: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_value_colnames</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Responses: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_value_colnames</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Predictor: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="p">))</span>
+    
+    <span class="c1"># For serialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;input_time_column&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_time_column</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;input_value_colnames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_value_colnames</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;output_value_colnames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_value_colnames</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
+        <span class="k">return</span> <span class="n">state_dict</span>
+        
+    <span class="c1"># For deserialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_time_column</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;input_time_column&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_value_colnames</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;input_value_colnames&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_value_colnames</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;output_value_colnames&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initLogger</span><span class="p">()</span></div>
+        
+
+<span class="k">class</span> <span class="nc">GeneralisationPerformance</span><span class="p">(</span><span class="n">LoggingHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">error_curve</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeneralisationPerformance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="c1"># Validation</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Target</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the target parameter to be a Target object! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the feature_name parameter to be a str object! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">error_curve</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ErrorCurve</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the error_curve parameter to be an ErrorCurve object! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">error_curve</span><span class="p">)))</span>
+        <span class="c1"># Setting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span> <span class="o">=</span> <span class="n">feature_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_curve</span> <span class="o">=</span> <span class="n">error_curve</span>
+        
+        
+    <span class="k">def</span> <span class="nf">get_overall_metrics_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_curve</span><span class="o">.</span><span class="n">get_overall_metrics_as_dataframe</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">prediction_inputs</span><span class="p">,</span> <span class="n">prediction_outputs</span><span class="p">,</span> <span class="n">verbose_inputs_to_outputs</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">get_verbose_fields</span><span class="p">()</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">description</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;prediction_inputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prediction_inputs</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;prediction_outputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prediction_outputs</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;verbose_inputs_to_outputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">verbose_inputs_to_outputs</span>
+        <span class="k">return</span> <span class="n">df</span>
+        
+        
+    <span class="k">def</span> <span class="nf">get_per_timestamp_metrics_df</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_curve</span><span class="o">.</span><span class="n">get_per_timestamp_metrics_as_dataframe</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">prediction_inputs</span><span class="p">,</span> <span class="n">prediction_outputs</span><span class="p">,</span> <span class="n">verbose_inputs_to_outputs</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">get_verbose_fields</span><span class="p">()</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">description</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;prediction_inputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prediction_inputs</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;prediction_outputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prediction_outputs</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;verbose_inputs_to_outputs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">verbose_inputs_to_outputs</span>
+        <span class="k">return</span> <span class="n">df</span>
+        
+        
+    <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(target=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, feature_name=&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span> <span class="o">+</span> <span class="s1">&#39;, error_curve=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_curve</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># For serialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;error_curve&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">error_curve</span>
+        <span class="k">return</span> <span class="n">state_dict</span>
+        
+    <span class="c1"># For deserialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_curve</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;error_curve&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initLogger</span><span class="p">()</span>
+        
+        
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator">[docs]</a><span class="k">class</span> <span class="nc">GeneralisationPerformanceEvaluator</span><span class="p">(</span><span class="n">LoggingHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>   
+    <span class="c1"># The constructor takes in fields that are common to all targets: the data container + prediction times</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeneralisationPerformanceEvaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prediction_times</span> <span class="o">=</span> <span class="n">prediction_times</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        
+    <span class="c1"># You can call this method multiple times to build up a collection of targets, before evaluating them</span>
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.add_to_targets"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.add_to_targets">[docs]</a>    <span class="k">def</span> <span class="nf">add_to_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictor_templates</span><span class="p">,</span> <span class="n">combos_of_input_time_column</span><span class="p">,</span> <span class="n">combos_of_input_value_colnames</span><span class="p">,</span> <span class="n">combos_of_output_value_colnames</span><span class="p">):</span>  
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>                  
+        <span class="c1"># Validation</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">combos_of_input_time_column</span><span class="p">)</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="n">combos_of_input_time_column</span> <span class="o">=</span> <span class="p">[</span><span class="n">combos_of_input_time_column</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">combos_of_input_value_colnames</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">combos_of_input_value_colnames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">combos_of_input_value_colnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">combos_of_input_value_colnames</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">combos_of_output_value_colnames</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">combos_of_output_value_colnames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">combos_of_output_value_colnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">combos_of_output_value_colnames</span><span class="p">]</span>
+        
+        <span class="c1"># Iteration         </span>
+        <span class="k">for</span> <span class="n">predictor_description</span><span class="p">,</span> <span class="n">predictor_template</span> <span class="ow">in</span> <span class="n">predictor_templates</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">input_time_column</span> <span class="ow">in</span> <span class="n">combos_of_input_time_column</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">input_value_colnames</span> <span class="ow">in</span> <span class="n">combos_of_input_value_colnames</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">output_value_colnames</span> <span class="ow">in</span> <span class="n">combos_of_output_value_colnames</span><span class="p">:</span>
+                        <span class="n">target</span> <span class="o">=</span> <span class="n">Target</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">predictor_template</span><span class="o">=</span><span class="n">predictor_template</span><span class="p">,</span> <span class="n">input_time_column</span><span class="o">=</span><span class="n">input_time_column</span><span class="p">,</span> <span class="n">input_value_colnames</span><span class="o">=</span><span class="n">input_value_colnames</span><span class="p">,</span> <span class="n">output_value_colnames</span><span class="o">=</span><span class="n">output_value_colnames</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">predictor_description</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target</span><span class="p">)</span></div>
+                    
+    
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.evaluate"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">series_splitter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chart_intermediate_results</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">series_splitter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">series_splitter</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Started full evaluation. series_splitter=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">series_splitter</span><span class="p">))</span>
+            
+            <span class="c1"># Contains a dictionary of tuples pointing to lists for all predictors:</span>
+            <span class="c1"># (Target object, feature name string) -&gt; list of [ intermediate scoring results ]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span> <span class="o">=</span> <span class="p">{}</span>
+            
+            <span class="c1"># Contains a dictionary of tuples pointing to lists for the tuning predictors only:</span>
+            <span class="c1"># (Target object, feature name string) -&gt; list of [ tuning metrics ]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span> <span class="o">=</span> <span class="p">{}</span>
+            
+            <span class="c1"># First pass: for common resamples/folds/splits (to be fair in evaluating models against each other!),</span>
+            <span class="c1"># perform the actual fit &amp; predict and gather up intermediate ScoringResult objects for each (target, feature) combo</span>
+            <span class="n">fold_counter</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">training_instance</span><span class="p">,</span> <span class="n">validation_instance</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">generate_series_folds</span><span class="p">(</span><span class="n">series_splitter</span><span class="o">=</span><span class="n">series_splitter</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Outer CV Loop. Fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Training = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">training_instance</span><span class="o">.</span><span class="n">_series_id_uniques</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; / Validation = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">validation_instance</span><span class="o">.</span><span class="n">_series_id_uniques</span><span class="p">))</span>
+                
+                <span class="k">if</span> <span class="n">chart_intermediate_results</span><span class="p">:</span>
+                    <span class="n">validation_instance</span><span class="o">.</span><span class="n">visualise</span><span class="p">(</span><span class="s1">&#39;Y_true for fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">))</span>
+                
+                <span class="n">target_counter</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Within fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, started evaluating individual target &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+                    <span class="n">predictor</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">predictor</span>
+                    
+                    <span class="c1"># Call fit/score</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">predictor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">training_instance</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">input_time_column</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">input_value_colnames</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">output_value_colnames</span><span class="p">)</span>
+                        <span class="n">scoring_results_for_multiple_features</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="o">=</span><span class="n">validation_instance</span><span class="p">,</span> <span class="n">prediction_times</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">input_time_column</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">input_value_colnames</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">output_value_colnames</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex2</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Exception while evaluating target &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; on fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">))</span> <span class="c1"># log where the exception occurred</span>
+                        <span class="k">raise</span> <span class="n">ex2</span> <span class="c1"># propagate</span>
+                    
+                    <span class="k">for</span> <span class="n">feature_name</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">output_value_colnames</span><span class="p">:</span>
+                        <span class="n">scoring_result</span> <span class="o">=</span> <span class="n">scoring_results_for_multiple_features</span><span class="p">[</span><span class="n">feature_name</span><span class="p">]</span>
+                        
+                        <span class="k">if</span> <span class="n">chart_intermediate_results</span><span class="p">:</span>
+                            <span class="n">scoring_result</span><span class="o">.</span><span class="n">Y_hat</span><span class="o">.</span><span class="n">visualise</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;INTERMEDIATE: Y_hat on fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; for</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">target</span><span class="o">.</span><span class="n">description</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="n">target</span><span class="o">.</span><span class="n">get_verbose_fields</span><span class="p">()[</span><span class="mi">2</span><span class="p">]))</span>
+                            <span class="n">scoring_result</span><span class="o">.</span><span class="n">err</span><span class="o">.</span><span class="n">visualise_per_timestamp</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;INTERMEDIATE: residuals on fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; for</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">target</span><span class="o">.</span><span class="n">description</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="n">target</span><span class="o">.</span><span class="n">get_verbose_fields</span><span class="p">()[</span><span class="mi">2</span><span class="p">]))</span>
+                                            
+                        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;First pass for scoring results. key = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># initialise the list if not already there</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scoring_result</span><span class="p">)</span>
+                        
+                    <span class="c1"># END: for feature_name in target.output_value_colnames</span>
+                            
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">target</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;First pass for tuning metrics. key = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">predictor</span><span class="p">),</span> <span class="n">TuningOverallPredictor</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">predictor</span><span class="p">),</span> <span class="n">TuningTimestampMultiplexerPredictor</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># initialise the list if not already there</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">predictor</span><span class="o">.</span><span class="n">tuning_metrics</span><span class="p">)</span>
+                                
+                    <span class="n">predictor</span><span class="o">.</span><span class="n">compact</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Within fold &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, finished evaluating individual target &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+                    <span class="n">target_counter</span> <span class="o">=</span> <span class="n">target_counter</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="c1"># END: for target in self.targets</span>
+                <span class="n">fold_counter</span> <span class="o">=</span> <span class="n">fold_counter</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="c1"># END: for (training_instance, validation_instance) in self.data.generate_series_folds(series_splitter=series_splitter)</span>
+            
+            <span class="c1"># Second pass: for each (target, feature) combo, compute a cross-validated error curve</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculate_second_pass</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_metrics_overall_df</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Logging exception before propagating: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ex1</span><span class="p">))</span> <span class="c1"># log where the exception occurred</span>
+            <span class="k">raise</span> <span class="n">ex1</span> <span class="c1"># propagate</span></div>
+        
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.calculate_second_pass"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.calculate_second_pass">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_second_pass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">generalisation_performances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Second pass. key = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="n">intermediate_scoring_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="n">cv_err</span> <span class="o">=</span> <span class="n">ErrorCurve</span><span class="o">.</span><span class="n">init_from_multiple_error_curves</span><span class="p">(</span><span class="n">sequence_error_curves</span><span class="o">=</span><span class="p">[</span><span class="n">sr</span><span class="o">.</span><span class="n">err</span> <span class="k">for</span> <span class="n">sr</span> <span class="ow">in</span> <span class="n">intermediate_scoring_results</span><span class="p">])</span>
+            <span class="n">gen</span> <span class="o">=</span> <span class="n">GeneralisationPerformance</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">error_curve</span><span class="o">=</span><span class="n">cv_err</span><span class="p">)</span>
+            <span class="n">generalisation_performances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+        <span class="c1"># END: for key in dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span>
+        
+        <span class="c1"># Cache the generalisation_performances within the object, and use that to build and store a DF of all </span>
+        <span class="c1"># results (and return the latter, for convenience).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Finished full evaluation. We now have a total of &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">generalisation_performances</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; individual results.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_performances</span> <span class="o">=</span> <span class="n">generalisation_performances</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_metrics_overall_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_overall_metrics_df</span><span class="p">()</span> <span class="k">for</span> <span class="n">gen</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_performances</span> <span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_metrics_per_timestamp_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_per_timestamp_metrics_df</span><span class="p">()</span> <span class="k">for</span> <span class="n">gen</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_performances</span> <span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+             
+        
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.get_sorted_overall_results"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.get_sorted_overall_results">[docs]</a>    <span class="k">def</span> <span class="nf">get_sorted_overall_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;rmse&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_metrics_overall_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;metric_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">metric</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">feature_name</span><span class="p">)</span> <span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rank_flipped&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+        
+        
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.get_best_n_overall_results"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.get_best_n_overall_results">[docs]</a>    <span class="k">def</span> <span class="nf">get_best_n_overall_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">best_n_results</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;rmse&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sorted_overall_results</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">best_n_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">best_n_results</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+        
+        
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.chart_overall_performance"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.chart_overall_performance">[docs]</a>    <span class="k">def</span> <span class="nf">chart_overall_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;rmse&#39;</span><span class="p">,</span> <span class="n">best_n_results</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">stderr_bar_multiple</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">func_update_description_strings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color_non_baseline</span><span class="o">=</span><span class="s1">&#39;C0&#39;</span><span class="p">,</span> <span class="n">color_baseline</span><span class="o">=</span><span class="s1">&#39;C3&#39;</span><span class="p">,</span> <span class="n">baseline_regular_expression</span><span class="o">=</span><span class="s1">&#39;Baseline&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">best_n_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Showing all results&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Showing the best &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_n_results</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; results&#39;</span>
+        
+        <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Generalisation performance for&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;feature &#39;</span> <span class="o">+</span> <span class="n">feature_name</span> <span class="o">+</span> <span class="s1">&#39; / &#39;</span> <span class="o">+</span> <span class="s1">&#39;metric &#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">title</span>
+        
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_best_n_overall_results</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">best_n_results</span><span class="o">=</span><span class="n">best_n_results</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span>
+        
+        <span class="c1"># Update descriptions if necessary</span>
+        <span class="k">if</span> <span class="n">func_update_description_strings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func_update_description_strings</span><span class="p">)</span>
+            
+        <span class="n">x_vals</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;metric_value&#39;</span><span class="p">]</span>
+        <span class="n">y_vals</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rank_flipped&#39;</span><span class="p">]</span>
+        <span class="n">yticks_vals</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;verbose_inputs_to_outputs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+        <span class="n">xerr_vals</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;metric_stderr&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">stderr_bar_multiple</span>
+        
+        <span class="c1"># Needed to flush any prev figures, to avoid overwriting</span>
+        <span class="k">if</span> <span class="n">figsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        
+        <span class="c1"># Plot baselines and non-baselines separately (on the same axes) so that they may be formatted differently</span>
+        <span class="c1"># FYI, built-in colours are https://matplotlib.org/users/dflt_style_changes.html</span>
+        <span class="n">is_baseline</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">baseline_regular_expression</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">is_non_baseline</span> <span class="o">=</span> <span class="p">[</span> <span class="ow">not</span> <span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">is_baseline</span> <span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_vals</span><span class="p">[</span><span class="n">is_baseline</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y_vals</span><span class="p">[</span><span class="n">is_baseline</span><span class="p">],</span> <span class="n">xerr</span><span class="o">=</span><span class="n">xerr_vals</span><span class="p">[</span><span class="n">is_baseline</span><span class="p">],</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color_baseline</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_vals</span><span class="p">[</span><span class="n">is_non_baseline</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">y_vals</span><span class="p">[</span><span class="n">is_non_baseline</span><span class="p">],</span> <span class="n">xerr</span><span class="o">=</span><span class="n">xerr_vals</span><span class="p">[</span><span class="n">is_non_baseline</span><span class="p">],</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color_non_baseline</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">y_vals</span><span class="p">,</span> <span class="n">yticks_vals</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39; +/- &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stderr_bar_multiple</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; S.E&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span></div>
+        
+        
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.chart_per_timestamp_performance"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.chart_per_timestamp_performance">[docs]</a>    <span class="k">def</span> <span class="nf">chart_per_timestamp_performance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;rmse&#39;</span><span class="p">,</span> <span class="n">best_n_overall_results</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">stderr_bar_multiple</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">errorevery</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">func_update_description_strings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Showing all results&#39;</span>
+        <span class="k">if</span> <span class="n">best_n_overall_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">best_n_overall_results</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">Inf</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Showing all results&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Showing the best &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">best_n_overall_results</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; overall results&#39;</span>
+        
+        <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Generalisation performance for&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;feature &#39;</span> <span class="o">+</span> <span class="n">feature_name</span> <span class="o">+</span> <span class="s1">&#39; / &#39;</span> <span class="o">+</span> <span class="s1">&#39;metric &#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">title</span>
+        
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_metrics_per_timestamp_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;metric_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">metric</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;feature_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">feature_name</span><span class="p">)</span> <span class="p">]</span>
+        
+        <span class="c1"># Filter the top N results.</span>
+        <span class="n">overall_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_best_n_overall_results</span><span class="p">(</span><span class="n">feature_name</span><span class="o">=</span><span class="n">feature_name</span><span class="p">,</span> <span class="n">best_n_results</span><span class="o">=</span><span class="n">best_n_overall_results</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span>
+        <span class="n">overall_df</span> <span class="o">=</span> <span class="n">overall_df</span><span class="p">[[</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;prediction_inputs&#39;</span><span class="p">,</span> <span class="s1">&#39;prediction_outputs&#39;</span><span class="p">,</span> <span class="s1">&#39;rank&#39;</span><span class="p">,</span> <span class="s1">&#39;rank_flipped&#39;</span><span class="p">]]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">overall_df</span><span class="p">)</span>
+        
+        <span class="c1"># Update descriptions if necessary</span>
+        <span class="k">if</span> <span class="n">func_update_description_strings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">func_update_description_strings</span><span class="p">)</span>
+        
+        <span class="n">count_rank_digits</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">overall_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;verbose_description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;rank&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="n">count_rank_digits</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;. &#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;verbose_inputs_to_outputs&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;stderr_bar&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;metric_stderr&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">stderr_bar_multiple</span>
+        
+        <span class="c1"># Extract values, ready for plotting</span>
+        <span class="n">pivoted_values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;verbose_description&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span>
+        <span class="n">pivoted_bars</span>   <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s1">&#39;stderr_bar&#39;</span><span class="p">,</span>   <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;verbose_description&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span>
+        <span class="c1"># Fix the x-limits, since the defaults make the error bars illegible</span>
+        <span class="n">x_axis_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="c1"># sort just in case</span>
+        <span class="n">x_axis_min_increment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x_axis_values</span><span class="p">))</span>
+        <span class="n">x_axis_min_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x_axis_values</span><span class="p">)</span>
+        <span class="n">x_axis_max_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x_axis_values</span><span class="p">)</span>
+        <span class="n">xlim_tupe</span><span class="o">=</span><span class="p">(</span><span class="n">x_axis_min_value</span> <span class="o">-</span> <span class="n">x_axis_min_increment</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">x_axis_max_value</span> <span class="o">+</span> <span class="n">x_axis_min_increment</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># Actual plotting    </span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">pivoted_values</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">yerr</span><span class="o">=</span><span class="n">pivoted_bars</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="n">xlim_tupe</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">errorevery</span><span class="o">=</span><span class="n">errorevery</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span><span class="mi">8</span><span class="p">})</span> 
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39; +/- &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stderr_bar_multiple</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; S.E&#39;</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.get_intermediate_scoring_results"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.get_intermediate_scoring_results">[docs]</a>    <span class="k">def</span> <span class="nf">get_intermediate_scoring_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tgt_friendly_key</span><span class="p">,</span> <span class="n">scoring_feature_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scoring_tgt_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tgt_feature</span> <span class="ow">in</span> <span class="n">scoring_tgt_features</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">tgt</span><span class="p">,</span> <span class="n">feature</span><span class="p">)</span> <span class="o">=</span> <span class="n">tgt_feature</span>
+            <span class="k">if</span> <span class="n">tgt_friendly_key</span> <span class="o">==</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get_friendly_key</span><span class="p">()</span> <span class="ow">and</span> <span class="n">scoring_feature_name</span> <span class="o">==</span> <span class="n">feature</span><span class="p">:</span>
+                <span class="n">list_of_intermediate_scoring_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">tgt_feature</span><span class="p">]</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_of_intermediate_scoring_results</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;More than one matching set of intermediate scoring results found: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No matching set of intermediate scoring results found&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+        
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.get_intermediate_tuning_metrics"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.get_intermediate_tuning_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">get_intermediate_tuning_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tgt_friendly_key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tuning_tgts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">tgt</span> <span class="ow">in</span> <span class="n">tuning_tgts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tgt_friendly_key</span> <span class="o">==</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get_friendly_key</span><span class="p">():</span>
+                <span class="n">list_of_tuning_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="p">[</span><span class="n">tgt</span><span class="p">]</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_of_tuning_metrics</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;More than one matching set of intermediate tuning metrics found: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)))</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No matching set of intermediate tuning metrics found&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+    
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.get_friendly_tgts_keys"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.get_friendly_tgts_keys">[docs]</a>    <span class="k">def</span> <span class="nf">get_friendly_tgts_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">set_for_scoring_results</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get_friendly_key</span><span class="p">()</span> <span class="k">for</span> <span class="p">(</span><span class="n">tgt</span><span class="p">,</span> <span class="n">scoring_field</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span> <span class="p">])</span>
+        <span class="n">set_for_tuning_metrics</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get_friendly_key</span><span class="p">()</span> <span class="k">for</span> <span class="n">tgt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span> <span class="p">])</span>
+        <span class="n">sorted_list_for_scoring_results</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">set_for_scoring_results</span><span class="p">)</span>
+        <span class="n">sorted_list_for_tuning_metrics</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">set_for_tuning_metrics</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">sorted_list_for_scoring_results</span><span class="p">,</span> <span class="n">sorted_list_for_tuning_metrics</span><span class="p">)</span>        </div>
+        
+<div class="viewcode-block" id="GeneralisationPerformanceEvaluator.to_csv"><a class="viewcode-back" href="../../index.html#pysf.generalisation.GeneralisationPerformanceEvaluator.to_csv">[docs]</a>    <span class="k">def</span> <span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_dirpath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">evaluator</span><span class="o">=</span><span class="bp">self</span>
+        
+        <span class="c1"># Save generalisation metrics (each row in the file is a target + metric combo, summarised over all generalisation folds)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">parent_dirpath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">parent_dirpath</span><span class="p">)</span>
+        <span class="n">evaluator</span><span class="o">.</span><span class="n">generalisation_metrics_overall_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">parent_dirpath</span> <span class="o">+</span> <span class="s1">&#39;generalisation_metrics_overall.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">evaluator</span><span class="o">.</span><span class="n">generalisation_metrics_per_timestamp_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">parent_dirpath</span> <span class="o">+</span> <span class="s1">&#39;generalisation_metrics_per_timestamp.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="c1"># Save tuning results, where available</span>
+        <span class="k">for</span> <span class="n">tgt</span> <span class="ow">in</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1">#print(tgt)</span>
+            <span class="n">tgt_dirname</span> <span class="o">=</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get_friendly_key</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="s1">&#39;!&#39;</span><span class="p">)</span>
+            <span class="n">list_of_tuning_metrics</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span><span class="p">[</span><span class="n">tgt</span><span class="p">]</span>
+            <span class="n">fold</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">tuning_metrics</span> <span class="ow">in</span> <span class="n">list_of_tuning_metrics</span><span class="p">:</span>
+                <span class="n">fold_dirname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold</span><span class="p">)</span>
+                <span class="n">fold_dirpath</span> <span class="o">=</span> <span class="n">parent_dirpath</span> <span class="o">+</span> <span class="n">tgt_dirname</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">fold_dirname</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;tuning_metrics/&#39;</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fold_dirpath</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">fold_dirpath</span><span class="p">)</span>
+                <span class="c1">#print(fold_dirpath)</span>
+                <span class="n">tuning_metrics</span><span class="o">.</span><span class="n">metrics_overall_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fold_dirpath</span> <span class="o">+</span> <span class="s1">&#39;metrics_overall.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">tuning_metrics</span><span class="o">.</span><span class="n">metrics_per_timestamp_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fold_dirpath</span> <span class="o">+</span> <span class="s1">&#39;metrics_per_timestamp.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">optimal_params_overall_df</span> <span class="o">=</span> <span class="n">tuning_metrics</span><span class="o">.</span><span class="n">metrics_overall_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tuning_metrics</span><span class="o">.</span><span class="n">metrics_overall_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;metric_name&#39;</span><span class="p">,</span> <span class="s1">&#39;feature_name&#39;</span><span class="p">])[</span><span class="s1">&#39;metric_value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()]</span>
+                <span class="n">optimal_params_overall_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fold_dirpath</span> <span class="o">+</span> <span class="s1">&#39;optimal_params_overall.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">optimal_params_per_timestamp_df</span> <span class="o">=</span> <span class="n">tuning_metrics</span><span class="o">.</span><span class="n">metrics_per_timestamp_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">tuning_metrics</span><span class="o">.</span><span class="n">metrics_per_timestamp_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;metric_name&#39;</span><span class="p">,</span> <span class="s1">&#39;feature_name&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">])[</span><span class="s1">&#39;metric_value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()]</span>
+                <span class="n">optimal_params_per_timestamp_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fold_dirpath</span> <span class="o">+</span> <span class="s1">&#39;optimal_params_per_timestamp.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">fold</span> <span class="o">=</span> <span class="n">fold</span> <span class="o">+</span> <span class="mi">1</span>    
+                
+        <span class="c1"># Save intermediate scoring results</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="p">(</span><span class="n">tgt</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">)</span> <span class="o">=</span> <span class="n">key</span>
+            <span class="c1">#print(tgt)</span>
+            <span class="c1">#print(feature_name)</span>
+            <span class="n">tgt_dirname</span> <span class="o">=</span> <span class="n">tgt</span><span class="o">.</span><span class="n">get_friendly_key</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span><span class="s1">&#39;!&#39;</span><span class="p">)</span>
+            <span class="n">list_of_scoring_results</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">fold</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">scoring_results</span> <span class="ow">in</span> <span class="n">list_of_scoring_results</span><span class="p">:</span>
+                <span class="n">fold_dirname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fold</span><span class="p">)</span>
+                <span class="n">fold_dirpath</span> <span class="o">=</span> <span class="n">parent_dirpath</span> <span class="o">+</span> <span class="n">tgt_dirname</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">fold_dirname</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="o">+</span> <span class="s1">&#39;scoring_results/&#39;</span> <span class="o">+</span> <span class="n">feature_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> 
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fold_dirpath</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">fold_dirpath</span><span class="p">)</span>
+                <span class="c1">#print(fold_dirpath)</span>
+                <span class="n">raw_residuals_df</span> <span class="o">=</span> <span class="n">scoring_results</span><span class="o">.</span><span class="n">residuals</span><span class="o">.</span><span class="n">residuals_raw</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;residual&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+                <span class="n">raw_residuals_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fold_dirpath</span> <span class="o">+</span> <span class="s1">&#39;raw_residuals.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">error_metrics_overall_df</span> <span class="o">=</span> <span class="n">scoring_results</span><span class="o">.</span><span class="n">err</span><span class="o">.</span><span class="n">get_overall_metrics_as_dataframe</span><span class="p">()</span>
+                <span class="n">error_metrics_overall_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fold_dirpath</span> <span class="o">+</span> <span class="s1">&#39;error_metrics_overall.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">error_metrics_per_timestamp_df</span> <span class="o">=</span> <span class="n">scoring_results</span><span class="o">.</span><span class="n">err</span><span class="o">.</span><span class="n">get_per_timestamp_metrics_as_dataframe</span><span class="p">()</span>
+                <span class="n">error_metrics_per_timestamp_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fold_dirpath</span> <span class="o">+</span> <span class="s1">&#39;error_metrics_per_timestamp.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">fold</span> <span class="o">=</span> <span class="n">fold</span> <span class="o">+</span> <span class="mi">1</span></div>
+                
+        <span class="c1"># Return nothing.</span>
+        
+    <span class="c1"># For serialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;prediction_times&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_times</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;dict_target_and_feature_name_to_list_of_intermediate_scoring_results&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;dict_target_to_list_of_tuning_metrics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;generalisation_performances&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_performances</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;generalisation_metrics_overall_df&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_metrics_overall_df</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;generalisation_metrics_per_timestamp_df&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_metrics_per_timestamp_df</span>
+        <span class="k">return</span> <span class="n">state_dict</span>
+        
+        
+    <span class="c1"># For deserialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prediction_times</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;prediction_times&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_and_feature_name_to_list_of_intermediate_scoring_results</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;dict_target_and_feature_name_to_list_of_intermediate_scoring_results&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dict_target_to_list_of_tuning_metrics</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;dict_target_to_list_of_tuning_metrics&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_performances</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;generalisation_performances&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_metrics_overall_df</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;generalisation_metrics_overall_df&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generalisation_metrics_per_timestamp_df</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;generalisation_metrics_per_timestamp_df&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initLogger</span><span class="p">()</span></div>
+    
+
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pysf 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ahmed Guecioueur.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,439 @@
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pysf.errors &#8212; pysf 0.0.4 documentation</title>
+    <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/bizstyle.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pysf 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pysf.errors</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span> <span class="nn">.logger</span> <span class="k">import</span> <span class="n">LoggingHandler</span> 
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
+
+
+<div class="viewcode-block" id="RawResiduals"><a class="viewcode-back" href="../../index.html#pysf.errors.RawResiduals">[docs]</a><span class="k">class</span> <span class="nc">RawResiduals</span><span class="p">(</span><span class="n">LoggingHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residuals_raw</span><span class="p">,</span> <span class="n">feature_colnames</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RawResiduals</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="c1"># Validation</span>
+        <span class="k">if</span> <span class="n">residuals_raw</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">feature_colnames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Cannot pass in a None as either of these params!&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">residuals_raw</span><span class="p">)</span> <span class="o">!=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Was expecting an xarray.DataArray object! Instead was initialised with a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">residuals_raw</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">feature_colnames</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">feature_colnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature_colnames</span><span class="p">]</span>
+        <span class="c1"># Assign public fields</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residuals_raw</span> <span class="o">=</span> <span class="n">residuals_raw</span>          <span class="c1"># xarray.DataArray</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_colnames</span> <span class="o">=</span> <span class="n">feature_colnames</span>    <span class="c1"># list of strings</span>
+
+<div class="viewcode-block" id="RawResiduals.visualise"><a class="viewcode-back" href="../../index.html#pysf.errors.RawResiduals.visualise">[docs]</a>    <span class="k">def</span> <span class="nf">visualise</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Raw residuals aggregated over&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="s1">&#39; + &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_colnames</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals_raw</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;raw residuals&#39;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+        
+    <span class="c1"># For serialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;feature_colnames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_colnames</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;residuals_raw&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals_raw</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;feature_colnames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_colnames</span>
+        <span class="k">return</span> <span class="n">state_dict</span>
+        
+    <span class="c1"># For deserialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_colnames</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;feature_colnames&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residuals_raw</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;residuals_raw&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_colnames</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;feature_colnames&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initLogger</span><span class="p">()</span></div>
+
+        
+<div class="viewcode-block" id="ErrorCurve"><a class="viewcode-back" href="../../index.html#pysf.errors.ErrorCurve">[docs]</a><span class="k">class</span> <span class="nc">ErrorCurve</span><span class="p">(</span><span class="n">LoggingHandler</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
+
+<span class="sd">    If the class has public attributes, they may be documented here</span>
+<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
+<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
+<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
+
+<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
+<span class="sd">    in the property&#39;s getter method.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        attr1 (str): Description of `attr1`.</span>
+<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>       
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LoggingHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="c1"># Do nothing. Constructor overloads are not possible in Python, so we initialise using static factory methods.</span>
+        
+        
+<div class="viewcode-block" id="ErrorCurve.init_from_raw_residuals"><a class="viewcode-back" href="../../index.html#pysf.errors.ErrorCurve.init_from_raw_residuals">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">init_from_raw_residuals</span><span class="p">(</span><span class="n">raw_residuals_obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">raw_residuals_obj</span><span class="p">)</span> <span class="o">!=</span> <span class="n">RawResiduals</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Was expecting a RawResiduals object! Instead was initialised with a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">raw_residuals_obj</span><span class="p">)))</span>
+
+        <span class="c1"># Transform the residuals to come up with Loss values for various error metrics.</span>
+        <span class="c1"># These are xr.DataArray:s with coords of timestamps &amp; series.</span>
+        <span class="n">residuals_raw</span> <span class="o">=</span> <span class="n">raw_residuals_obj</span><span class="o">.</span><span class="n">residuals_raw</span>
+        <span class="n">residuals_abs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals_raw</span><span class="p">)</span>   <span class="c1"># these are the Loss values for MAE</span>
+        <span class="n">residuals_sqr</span> <span class="o">=</span> <span class="n">residuals_raw</span> <span class="o">**</span> <span class="mi">2</span>      <span class="c1"># these are the Loss values for (R)MSE</span>
+        
+        <span class="c1"># Prepare some counts: N = # series, K = # timestamps.</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">residuals_raw</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">residuals_raw</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate the error metrics from the Loss values, per timestamp. These are &quot;1D&quot; xr.DataArray:s.</span>
+        <span class="n">mae_per_timestamp</span> <span class="o">=</span> <span class="n">residuals_abs</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">)</span>
+        <span class="n">mse_per_timestamp</span> <span class="o">=</span> <span class="n">residuals_sqr</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">)</span>
+        <span class="n">rmse_per_timestamp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse_per_timestamp</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate unbiased (1) estimates instead of biased (0) ones for all (co)variances</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="mi">1</span> 
+        
+        <span class="c1"># Calculate SEs (SDs of the mean errors) per timestamp. These are &quot;1D&quot; xr.DataArray:s.</span>
+        <span class="n">se_mae_per_timestamp</span> <span class="o">=</span> <span class="n">residuals_abs</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">df</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">se_mse_per_timestamp</span> <span class="o">=</span> <span class="n">residuals_sqr</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">df</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">se_rmse_per_timestamp</span> <span class="o">=</span> <span class="n">se_mse_per_timestamp</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">rmse_per_timestamp</span><span class="p">)</span> <span class="c1"># Delta-method approx.</span>
+        
+        <span class="c1"># Calculate the error metrics from the Loss values, overall. These are scalars.</span>
+        <span class="n">mae_overall</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">residuals_abs</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">mse_overall</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">residuals_sqr</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">rmse_overall</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mse_overall</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate sample covariance matrices from the Loss values along the time axis (hence the </span>
+        <span class="c1"># transpose). We need these to deal with dependencies along the time axis.</span>
+        <span class="c1"># These will be K*K matrices.</span>
+        <span class="n">covmat_res_abs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">residuals_abs</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="n">ddof</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">covmat_res_sqr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">residuals_sqr</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="n">ddof</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate SEs (SDs of the mean errors) overall. These are scalars.</span>
+        <span class="c1"># TODO: I&#39;m using N in the denominator, but is this specifically for the biased or unbiased case?</span>
+        <span class="n">se_mae_overall</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">covmat_res_abs</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">se_mse_overall</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">covmat_res_sqr</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">se_rmse_overall</span> <span class="o">=</span> <span class="n">se_mse_overall</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">rmse_overall</span><span class="p">)</span> <span class="c1"># Delta-method approx.</span>
+        
+        <span class="n">res</span> <span class="o">=</span> <span class="n">ErrorCurve</span><span class="p">()</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">_metrics_per_timestamp_values</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span>  <span class="s1">&#39;mae&#39;</span><span class="p">:</span> <span class="n">mae_per_timestamp</span>
+                                                          <span class="p">,</span> <span class="s1">&#39;mse&#39;</span><span class="p">:</span> <span class="n">mse_per_timestamp</span>
+                                                          <span class="p">,</span> <span class="s1">&#39;rmse&#39;</span><span class="p">:</span> <span class="n">rmse_per_timestamp</span>
+                                                          <span class="p">})</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">_metrics_per_timestamp_stderrs</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span> <span class="s1">&#39;mae&#39;</span><span class="p">:</span> <span class="n">se_mae_per_timestamp</span>
+                                                          <span class="p">,</span> <span class="s1">&#39;mse&#39;</span><span class="p">:</span> <span class="n">se_mse_per_timestamp</span>
+                                                          <span class="p">,</span> <span class="s1">&#39;rmse&#39;</span><span class="p">:</span> <span class="n">se_rmse_per_timestamp</span>
+                                                          <span class="p">})</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">_metrics_overall_values</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span>  <span class="s1">&#39;mae&#39;</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">mae_overall</span><span class="p">)</span>
+                                                  <span class="p">,</span> <span class="s1">&#39;mse&#39;</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">mse_overall</span><span class="p">)</span>
+                                                  <span class="p">,</span> <span class="s1">&#39;rmse&#39;</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">rmse_overall</span><span class="p">)</span>
+                                                 <span class="p">})</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">_metrics_overall_stderrs</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">({</span>  <span class="s1">&#39;mae&#39;</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">se_mae_overall</span><span class="p">)</span>
+                                                   <span class="p">,</span> <span class="s1">&#39;mse&#39;</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">se_mse_overall</span><span class="p">)</span>
+                                                   <span class="p">,</span> <span class="s1">&#39;rmse&#39;</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">se_rmse_overall</span><span class="p">)</span>
+                                                  <span class="p">})</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+      
+    
+<div class="viewcode-block" id="ErrorCurve.init_from_multiple_error_curves"><a class="viewcode-back" href="../../index.html#pysf.errors.ErrorCurve.init_from_multiple_error_curves">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">init_from_multiple_error_curves</span><span class="p">(</span><span class="n">sequence_error_curves</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_metrics_overall_values</span>  <span class="o">=</span> <span class="p">[</span><span class="n">err</span><span class="o">.</span><span class="n">_metrics_overall_values</span>  <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">sequence_error_curves</span><span class="p">]</span>
+        <span class="n">list_metrics_overall_stderrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">err</span><span class="o">.</span><span class="n">_metrics_overall_stderrs</span> <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">sequence_error_curves</span><span class="p">]</span>
+        <span class="n">list_metrics_per_timestamp_values</span>  <span class="o">=</span> <span class="p">[</span><span class="n">err</span><span class="o">.</span><span class="n">_metrics_per_timestamp_values</span>  <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">sequence_error_curves</span><span class="p">]</span>
+        <span class="n">list_metrics_per_timestamp_stderrs</span> <span class="o">=</span> <span class="p">[</span><span class="n">err</span><span class="o">.</span><span class="n">_metrics_per_timestamp_stderrs</span> <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">sequence_error_curves</span><span class="p">]</span>
+        
+        <span class="c1"># Gather the folds data together with a new dimension &#39;fold&#39; (that has not labels)</span>
+        <span class="n">concat_metrics_overall_values</span>  <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">objs</span><span class="o">=</span><span class="n">list_metrics_overall_values</span><span class="p">,</span>  <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;fold&#39;</span><span class="p">)</span>
+        <span class="n">concat_metrics_overall_stderrs</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">objs</span><span class="o">=</span><span class="n">list_metrics_overall_stderrs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;fold&#39;</span><span class="p">)</span>
+        <span class="n">concat_metrics_per_timestamp_values</span>  <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">objs</span><span class="o">=</span><span class="n">list_metrics_per_timestamp_values</span><span class="p">,</span>  <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;fold&#39;</span><span class="p">)</span>
+        <span class="n">concat_metrics_per_timestamp_stderrs</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">objs</span><span class="o">=</span><span class="n">list_metrics_per_timestamp_stderrs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="s1">&#39;fold&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># Average over all the folds, making sure to take the mean of VARIANCES rather than SDs:</span>
+        <span class="n">mean_metrics_overall_values</span>  <span class="o">=</span> <span class="n">concat_metrics_overall_values</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;fold&#39;</span><span class="p">)</span>
+        <span class="n">mean_metrics_overall_stderrs</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">ufuncs</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">concat_metrics_overall_stderrs</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;fold&#39;</span><span class="p">))</span>
+        <span class="n">mean_metrics_per_timestamp_values</span>  <span class="o">=</span> <span class="n">concat_metrics_per_timestamp_values</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;fold&#39;</span><span class="p">)</span>
+        <span class="n">mean_metrics_per_timestamp_stderrs</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">ufuncs</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">concat_metrics_per_timestamp_stderrs</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="s1">&#39;fold&#39;</span><span class="p">))</span>
+        
+        <span class="n">res</span> <span class="o">=</span> <span class="n">ErrorCurve</span><span class="p">()</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">_metrics_overall_values</span> <span class="o">=</span> <span class="n">mean_metrics_overall_values</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">_metrics_overall_stderrs</span> <span class="o">=</span> <span class="n">mean_metrics_overall_stderrs</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">_metrics_per_timestamp_values</span> <span class="o">=</span> <span class="n">mean_metrics_per_timestamp_values</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">_metrics_per_timestamp_stderrs</span> <span class="o">=</span> <span class="n">mean_metrics_per_timestamp_stderrs</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+        
+<div class="viewcode-block" id="ErrorCurve.visualise_per_timestamp"><a class="viewcode-back" href="../../index.html#pysf.errors.ErrorCurve.visualise_per_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">visualise_per_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">stderr_bar_multiple</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initial setup</span>
+        <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mae&#39;</span><span class="p">,</span> <span class="s1">&#39;rmse&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span> <span class="c1"># for consistency</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">title</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">title</span> <span class="o">+</span> <span class="s1">&#39;Errors per timestamp, with bars representing +/- &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stderr_bar_multiple</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; S.E.&#39;</span>
+        <span class="c1"># Extract values, ready for plotting</span>
+        <span class="n">values_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_timestamp_values</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()[</span><span class="n">metrics</span><span class="p">]</span>
+        <span class="n">stderr_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_timestamp_stderrs</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()[</span><span class="n">metrics</span><span class="p">]</span> <span class="o">*</span> <span class="n">stderr_bar_multiple</span>
+        <span class="c1"># Fix the x-limits, since the defaults make the error bars illegible</span>
+        <span class="n">x_axis_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_timestamp_values</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">x_axis_min_increment</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x_axis_values</span><span class="p">))</span>
+        <span class="n">x_axis_min_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x_axis_values</span><span class="p">)</span>
+        <span class="n">x_axis_max_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x_axis_values</span><span class="p">)</span>
+        <span class="n">xlim_tupe</span><span class="o">=</span><span class="p">(</span><span class="n">x_axis_min_value</span> <span class="o">-</span> <span class="n">x_axis_min_increment</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">x_axis_max_value</span> <span class="o">+</span> <span class="n">x_axis_min_increment</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># Actual plotting</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">values_df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">yerr</span><span class="o">=</span><span class="n">stderr_df</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="n">xlim_tupe</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Error metric&#39;</span><span class="p">)</span> <span class="c1"># move the legend out of the way</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+    
+        
+    <span class="c1"># Doesn&#39;t return anything</span>
+<div class="viewcode-block" id="ErrorCurve.visualise_overall"><a class="viewcode-back" href="../../index.html#pysf.errors.ErrorCurve.visualise_overall">[docs]</a>    <span class="k">def</span> <span class="nf">visualise_overall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stderr_bar_multiple</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initial setup</span>
+        <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mae&#39;</span><span class="p">,</span> <span class="s1">&#39;rmse&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">]</span> <span class="c1"># for consistency</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">title</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">title</span> <span class="o">+</span> <span class="s1">&#39;Errors overall, with bars representing +/- &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">stderr_bar_multiple</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; S.E.&#39;</span>
+      
+        <span class="n">values_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_overall_values</span><span class="p">[</span><span class="n">metrics</span><span class="p">]</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">stderr_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_overall_stderrs</span><span class="p">[</span><span class="n">metrics</span><span class="p">]</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        <span class="n">x_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">))</span>
+        
+        <span class="c1"># Needed to flush any prev figures, to avoid overwriting</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        
+        <span class="c1"># Workaround to remove lines: https://stackoverflow.com/questions/18498742/how-do-you-make-an-errorbar-plot-in-matplotlib-using-linestyle-none-in-rcparams</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">values_arr</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">values_arr</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">stderr_arr</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span> <span class="c1"># this displays strings as X labels</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x_vals</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x_vals</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span></div>
+       
+        
+    <span class="c1"># Returns a long-style DF with columns [&#39;metric_name&#39;, &#39;metric_variable&#39;, &#39;metric_value&#39;]</span>
+<div class="viewcode-block" id="ErrorCurve.get_overall_metrics_as_dataframe"><a class="viewcode-back" href="../../index.html#pysf.errors.ErrorCurve.get_overall_metrics_as_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">get_overall_metrics_as_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_overall_values</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+                     <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_overall_stderrs</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="s1">&#39;stderr&#39;</span><span class="p">)</span>
+              <span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;variable&#39;</span><span class="p">:</span><span class="s1">&#39;metric_name&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span><span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">:</span><span class="s1">&#39;metric_stderr&#39;</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+    
+        
+    <span class="c1"># Returns a long-style DF with columns [&#39;metric_name&#39;, &#39;timestamp&#39;, &#39;metric_variable&#39;, &#39;metric_value&#39;]</span>
+<div class="viewcode-block" id="ErrorCurve.get_per_timestamp_metrics_as_dataframe"><a class="viewcode-back" href="../../index.html#pysf.errors.ErrorCurve.get_per_timestamp_metrics_as_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">get_per_timestamp_metrics_as_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            param1: The first parameter.</span>
+<span class="sd">            param2: The second parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if successful, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_timestamp_values</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+                     <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_timestamp_stderrs</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="s1">&#39;stderr&#39;</span><span class="p">)</span>
+              <span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>   
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;variable&#39;</span><span class="p">:</span><span class="s1">&#39;metric_name&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span><span class="s1">&#39;metric_value&#39;</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">:</span><span class="s1">&#39;metric_stderr&#39;</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+        
+    <span class="c1"># For serialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;_metrics_overall_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_overall_values</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;_metrics_overall_stderrs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_overall_stderrs</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;_metrics_per_timestamp_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_timestamp_values</span>
+        <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;_metrics_per_timestamp_stderrs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_timestamp_stderrs</span>
+        <span class="k">return</span> <span class="n">state_dict</span>
+        
+    <span class="c1"># For deserialization via Pickle</span>
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state_dict</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_overall_values</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;_metrics_overall_values&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_overall_stderrs</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;_metrics_overall_stderrs&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_timestamp_values</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;_metrics_per_timestamp_values&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_metrics_per_timestamp_stderrs</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;_metrics_per_timestamp_stderrs&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initLogger</span><span class="p">()</span></div>
+
+
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pysf 0.0.4 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Ahmed Guecioueur.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+  </body>
+</html>
