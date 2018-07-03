@@ -4,4 +4,10 @@
 
 Supervised forecasting of sequential data in Python.
 
-[Click here to view the documentation.](https://ahmedgc.github.io/pysf)
+## Documentation
+
+API documentation is [hosted on GitHub Pages](https://ahmedgc.github.io/pysf).
+
+## Copyright and license
+
+Code and documentation copyright 2018 [Ahmed Guecioueur](https://www.ahmedgc.com). Code released under the MIT License. 
