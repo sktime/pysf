@@ -107,7 +107,7 @@ multiseries_smoothing_pcr_predictor.set_parameters({ 'pca__n_components' : 3 , '
 
 
 ########################################################################################
-# Predict the last 365 days of the year and assess the results.
+# Predict the last 65 days of the year and assess the results.
 # We are fitting on the training set and predicting & scoring on the validation set
 ########################################################################################
 
