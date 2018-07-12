@@ -215,7 +215,7 @@ class AbstractPredictor(ABC, LoggingHandler):
             param2: The second parameter.
 
         Returns:
-            True if successful, False otherwise.
+            A dictionary of prediction feature names (`string`s) to `ScoringResult`s.
 
         """
         # Validation

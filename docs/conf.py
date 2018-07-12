@@ -30,6 +30,18 @@ sys.path.insert(0, sourcepath)
 #sys.path.insert(0, os.path.abspath("../pysf"))
 print(sys.path)
 
+print("Running in Python working directory " + os.getcwd())
+backup_cwd = os.getcwd()
+
+os.chdir('..')
+print("Nowunning in Python working directory " + os.getcwd())
+
+import pysf
+print("Imported pysf from " + pysf.__file__)
+
+os.chdir(backup_cwd)
+print("Now running in Python working directory " + os.getcwd())
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
