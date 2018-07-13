@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pysf.predictors.framework &#8212; pysf 0.0.4 documentation</title>
     <link rel="stylesheet" href="../../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../../',
-        VERSION:     '0.0.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
@@ -29,8 +21,7 @@
     <!--[if lt IE 9]>
     <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
     <![endif]-->
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -48,12 +39,14 @@
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -107,7 +100,7 @@
 <span class="sd">            True if successful, False otherwise.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ScoringResult</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ScoringResult</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Was expecting a str object for param feature_name! Instead was initialised with a &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">feature_name</span><span class="p">)))</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">Y_true</span><span class="p">)</span> <span class="o">!=</span> <span class="n">MultiSeries</span><span class="p">:</span>
@@ -159,7 +152,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>       
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_isFitted</span> <span class="o">=</span> <span class="kc">False</span>
 
 <div class="viewcode-block" id="AbstractPredictor.set_parameters"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor.set_parameters">[docs]</a>    <span class="nd">@abstractmethod</span>
@@ -206,6 +199,22 @@
         <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the times parameter to be a 1D array but instead it had shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">times</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span></div>
 
+<div class="viewcode-block" id="AbstractPredictor._checkAndCompleteInputNonTimeFeatures"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor._checkAndCompleteInputNonTimeFeatures">[docs]</a>    <span class="k">def</span> <span class="nf">_checkAndCompleteInputNonTimeFeatures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
+        <span class="c1"># As well as any specifically-named features (if any) it should include the prediction features, in a union.</span>
+        <span class="k">if</span> <span class="n">input_non_time_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_non_time_features</span><span class="p">]</span>
+        
+        <span class="c1"># It would be more efficient to do this by union&#39;ing set operations, but operations like this should be deterministic in general:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prediction_features</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">input_non_time_features</span><span class="p">:</span>
+                <span class="n">input_non_time_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Determined input_non_time_features = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">input_non_time_features</span></div>
+
+            
     <span class="c1"># X must be a MultiSeries</span>
 <div class="viewcode-block" id="AbstractPredictor.fit"><a class="viewcode-back" href="../../../index.html#pysf.predictors.framework.AbstractPredictor.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">,</span> <span class="n">input_time_feature</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prediction_features</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Class methods are similar to regular functions.</span>
@@ -364,7 +373,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>         
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chain</span> <span class="o">=</span> <span class="p">[]):</span>  
-        <span class="nb">super</span><span class="p">(</span><span class="n">PipelinePredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PipelinePredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">:</span>
             <span class="n">chain</span> <span class="o">=</span> <span class="p">[</span> <span class="n">chain</span> <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span> <span class="o">=</span> <span class="n">chain</span>
@@ -414,7 +423,7 @@
         
     <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;( &#39;</span> <span class="o">+</span> <span class="s1">&#39; ==&gt; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; )&#39;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;( &#39;</span> <span class="o">+</span> <span class="s1">&#39; ==&gt; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chain</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; )&#39;</span><span class="p">)</span></div>
         
 
     
@@ -437,7 +446,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>       
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SingleCurveSeriesPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SingleCurveSeriesPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span> <span class="o">=</span> <span class="n">classic_estimator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span> <span class="o">=</span> <span class="n">allow_missing_values</span>
         
@@ -534,44 +543,9 @@
     
     <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(_classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;(_classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
     
-        
-        
-<span class="k">class</span> <span class="nc">AbstractMultiCurvePredictor</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
-
-<span class="sd">    If the class has public attributes, they may be documented here</span>
-<span class="sd">    in an ``Attributes`` section and follow the same formatting as a</span>
-<span class="sd">    function&#39;s ``Args`` section. Alternatively, attributes may be documented</span>
-<span class="sd">    inline with the attribute&#39;s declaration (see __init__ method below).</span>
-
-<span class="sd">    Properties created with the ``@property`` decorator should be documented</span>
-<span class="sd">    in the property&#39;s getter method.</span>
-
-<span class="sd">    Attributes:</span>
-<span class="sd">        attr1 (str): Description of `attr1`.</span>
-<span class="sd">        attr2 (:obj:`int`, optional): Description of `attr2`.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>       
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractMultiCurvePredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
-        
-    <span class="k">def</span> <span class="nf">_checkAndCompleteInputNonTimeFeatures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_non_time_features</span><span class="p">,</span> <span class="n">prediction_features</span><span class="p">):</span>
-        <span class="c1"># As well as any specifically-named features (if any) it should include the prediction features, in a union.</span>
-        <span class="k">if</span> <span class="n">input_non_time_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
-            <span class="n">input_non_time_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_non_time_features</span><span class="p">]</span>
-        
-        <span class="c1"># It would be more efficient to do this by union&#39;ing set operations, but operations like this should be deterministic in general:</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prediction_features</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">input_non_time_features</span><span class="p">:</span>
-                <span class="n">input_non_time_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Determined input_non_time_features = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_non_time_features</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">input_non_time_features</span>
-        
+                
    
         
 <span class="k">class</span> <span class="nc">AbstractWindowedPredictor</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">):</span>
@@ -594,7 +568,7 @@
     <span class="n">ParameterNameOutputWindowWidth</span> <span class="o">=</span> <span class="s1">&#39;width_output&#39;</span>
     
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractWindowedPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractWindowedPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
     
     <span class="c1"># Implementation of the abstract method. Simply passes the parameters through to the underlying sklearn estimator.</span>
     <span class="k">def</span> <span class="nf">set_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_dict</span><span class="p">):</span>          
@@ -653,7 +627,7 @@
         
     
 <span class="c1"># This works only with SKLearn Estimators conforming to the usual fit/predict pattern at the moment. </span>
-<span class="k">class</span> <span class="nc">MultiCurveTabularPredictor</span><span class="p">(</span><span class="n">AbstractMultiCurvePredictor</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MultiCurveTabularPredictor</span><span class="p">(</span><span class="n">AbstractPredictor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
 
 <span class="sd">    If the class has public attributes, they may be documented here</span>
@@ -670,7 +644,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>       
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MultiCurveTabularPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiCurveTabularPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span> <span class="o">=</span> <span class="n">classic_estimator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span> <span class="o">=</span> <span class="n">allow_missing_values</span>
         
@@ -747,10 +721,10 @@
         
     <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(_classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;(_classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
     
 
-<span class="k">class</span> <span class="nc">MultiCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">AbstractMultiCurvePredictor</span><span class="p">,</span> <span class="n">AbstractWindowedPredictor</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">MultiCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">AbstractWindowedPredictor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
 
 <span class="sd">    If the class has public attributes, they may be documented here</span>
@@ -769,7 +743,7 @@
     <span class="n">ParameterNameTrainOverPredictionTimes</span> <span class="o">=</span> <span class="s1">&#39;train_over_prediction_times&#39;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MultiCurveTabularWindowedPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MultiCurveTabularWindowedPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span> <span class="o">=</span> <span class="n">classic_estimator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span> <span class="o">=</span> <span class="n">allow_missing_values</span>
         <span class="c1"># Need to initialise to None to avoid breaking the deep copy while tuning an unparameterised instance</span>
@@ -906,12 +880,12 @@
         
     <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(width_input = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;, width_output = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, _classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;(width_input = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;, width_output = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, _classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
          
 
         
         
-<span class="k">class</span> <span class="nc">SingleCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">AbstractMultiCurvePredictor</span><span class="p">,</span> <span class="n">AbstractWindowedPredictor</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SingleCurveTabularWindowedPredictor</span><span class="p">(</span><span class="n">AbstractWindowedPredictor</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The summary line for a class docstring should fit on one line.</span>
 
 <span class="sd">    If the class has public attributes, they may be documented here</span>
@@ -928,7 +902,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>       
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">classic_estimator</span><span class="p">,</span> <span class="n">allow_missing_values</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">SingleCurveTabularWindowedPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SingleCurveTabularWindowedPredictor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span> <span class="o">=</span> <span class="n">classic_estimator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span> <span class="o">=</span> <span class="n">allow_missing_values</span>
         <span class="c1"># Need to initialise to None to avoid breaking the deep copy while tuning an unparameterised instance</span>
@@ -1035,7 +1009,7 @@
         
     <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(width_input = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;, width_output = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, _classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;(width_input = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_input</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;, width_output = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_output</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, _classic_estimator = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_classic_estimator</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, allow_missing_values = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_allow_missing_values</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
   
 
         
@@ -1061,7 +1035,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Ahmed Guecioueur.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.
     </div>
   </body>
 </html>

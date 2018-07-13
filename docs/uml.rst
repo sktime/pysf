@@ -14,8 +14,9 @@ UML diagrams
 All predictors & transformers
 =======================================   
 
-.. inheritance-diagram:: pysf.predictors.tuning.TuningOverallPredictor  pysf.predictors.tuning.TuningTimestampMultiplexerPredictor pysf.predictors.forest.MultiCurveRandomForestPredictor pysf.predictors.kernels.MultiCurveKernelsPredictor pysf.predictors.framework.SingleCurveSeriesPredictor pysf.predictors.framework.MultiCurveTabularPredictor pysf.predictors.framework.MultiCurveTabularWindowedPredictor pysf.predictors.framework.SingleCurveTabularWindowedPredictor pysf.predictors.baselines.SeriesLinearInterpolator pysf.predictors.baselines.ZeroPredictor 
-pysf.predictors.baselines.SeriesMeansPredictor pysf.predictors.baselines.TimestampMeansPredictor pysf.transformers.framework.AbstractTransformer pysf.transformers.smoothing.SmoothingSplineTransformer pysf.predictors.lstm.MultiCurveWindowedLstmPredictor
+.. inheritance-diagram:: pysf.predictors.tuning.TuningOverallPredictor  pysf.predictors.tuning.TuningTimestampMultiplexerPredictor pysf.predictors.forest.MultiCurveRandomForestPredictor pysf.predictors.kernels.MultiCurveKernelsPredictor pysf.predictors.framework.SingleCurveSeriesPredictor pysf.predictors.framework.MultiCurveTabularPredictor pysf.predictors.framework.MultiCurveTabularWindowedPredictor pysf.predictors.framework.SingleCurveTabularWindowedPredictor pysf.predictors.baselines.SeriesLinearInterpolator pysf.predictors.baselines.ZeroPredictor pysf.predictors.baselines.SeriesMeansPredictor pysf.predictors.baselines.TimestampMeansPredictor pysf.transformers.framework.AbstractTransformer pysf.transformers.smoothing.SmoothingSplineTransformer pysf.predictors.lstm.MultiCurveWindowedLstmPredictor
+   :top-classes: pysf.predictors.framework.AbstractPredictor, pysf.transformers.framework.AbstractTransformer, pysf.predictors.lstm.AbstractLstmPredictor
+   :parts: 3
 
    
 Indices and tables

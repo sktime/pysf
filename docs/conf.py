@@ -46,7 +46,9 @@ print("Now running in Python working directory " + os.getcwd())
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-# needs_sphinx = '1.0'
+
+# Needed for the    ":top-classes: ” option to command “.. inheritance-diagram:: "
+needs_sphinx = '1.7'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

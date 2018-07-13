@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>_weakrefset &#8212; pysf 0.0.4 documentation</title>
     <link rel="stylesheet" href="../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.0.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
@@ -29,8 +21,7 @@
     <!--[if lt IE 9]>
     <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
     <![endif]-->
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -48,12 +39,14 @@
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -142,7 +135,7 @@
         <span class="k">return</span> <span class="n">wr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
     <span class="k">def</span> <span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),),</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">),),</span>
                 <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__dict__&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
@@ -156,7 +149,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">pop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_removals</span><span class="p">:</span>
@@ -194,10 +187,10 @@
         <span class="n">newset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">newset</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">newset</span>
-    <span class="n">__sub__</span> <span class="o">=</span> <span class="n">difference</span>
+    <span class="fm">__sub__</span> <span class="o">=</span> <span class="n">difference</span>
 
     <span class="k">def</span> <span class="nf">difference_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__isub__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__isub__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_removals</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_commit_removals</span><span class="p">()</span>
@@ -208,11 +201,11 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">intersection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
-    <span class="n">__and__</span> <span class="o">=</span> <span class="n">intersection</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="fm">__and__</span> <span class="o">=</span> <span class="n">intersection</span>
 
     <span class="k">def</span> <span class="nf">intersection_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__iand__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__iand__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__iand__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_removals</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_commit_removals</span><span class="p">()</span>
@@ -221,20 +214,20 @@
 
     <span class="k">def</span> <span class="nf">issubset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span><span class="p">)</span>
-    <span class="n">__le__</span> <span class="o">=</span> <span class="n">issubset</span>
+    <span class="fm">__le__</span> <span class="o">=</span> <span class="n">issubset</span>
 
     <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="nb">set</span><span class="p">(</span><span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">issuperset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">issuperset</span><span class="p">(</span><span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span><span class="p">)</span>
-    <span class="n">__ge__</span> <span class="o">=</span> <span class="n">issuperset</span>
+    <span class="fm">__ge__</span> <span class="o">=</span> <span class="n">issuperset</span>
 
     <span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">&gt;</span> <span class="nb">set</span><span class="p">(</span><span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">NotImplemented</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span><span class="p">)</span>
 
@@ -242,10 +235,10 @@
         <span class="n">newset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">newset</span><span class="o">.</span><span class="n">symmetric_difference_update</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">newset</span>
-    <span class="n">__xor__</span> <span class="o">=</span> <span class="n">symmetric_difference</span>
+    <span class="fm">__xor__</span> <span class="o">=</span> <span class="n">symmetric_difference</span>
 
     <span class="k">def</span> <span class="nf">symmetric_difference_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__ixor__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__ixor__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">__ixor__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pending_removals</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_commit_removals</span><span class="p">()</span>
@@ -256,8 +249,8 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">e</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">s</span><span class="p">)</span>
-    <span class="n">__or__</span> <span class="o">=</span> <span class="n">union</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">e</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">s</span><span class="p">)</span>
+    <span class="fm">__or__</span> <span class="o">=</span> <span class="n">union</span>
 
     <span class="k">def</span> <span class="nf">isdisjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">other</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
@@ -283,7 +276,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Ahmed Guecioueur.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.
     </div>
   </body>
 </html>

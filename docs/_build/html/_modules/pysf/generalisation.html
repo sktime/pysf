@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>pysf.generalisation &#8212; pysf 0.0.4 documentation</title>
     <link rel="stylesheet" href="../../_static/bizstyle.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.0.4',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
@@ -29,8 +21,7 @@
     <!--[if lt IE 9]>
     <script type="text/javascript" src="_static/css3-mediaqueries.js"></script>
     <![endif]-->
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -48,12 +39,14 @@
         <div class="sphinxsidebarwrapper">
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -167,7 +160,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">predictor_template</span><span class="p">,</span> <span class="n">input_time_column</span><span class="p">,</span> <span class="n">input_value_colnames</span><span class="p">,</span> <span class="n">output_value_colnames</span><span class="p">,</span> <span class="n">description</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Target</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         
         <span class="c1"># Validation</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">MultiSeries</span><span class="p">:</span>
@@ -211,7 +204,7 @@
         
     <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">+</span> <span class="s1">&#39;. Use time as Covariate: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_time_column</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;. Non-time Covariates: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_value_colnames</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Responses: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_value_colnames</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Predictor: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">+</span> <span class="s1">&#39;. Use time as Covariate: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_time_column</span><span class="p">)</span> <span class="o">+</span><span class="s1">&#39;. Non-time Covariates: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_value_colnames</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Responses: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_value_colnames</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;. Predictor: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="p">))</span>
     
     <span class="c1"># For serialization via Pickle</span>
     <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -250,7 +243,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>       
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">error_curve</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">GeneralisationPerformance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeneralisationPerformance</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># Validation</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Target</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Expected the target parameter to be a Target object! Instead it was &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">target</span><span class="p">)))</span>
@@ -308,7 +301,7 @@
         
     <span class="c1"># This syntax allows str(obj) to be called on an instance obj of our class</span>
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">+</span> <span class="s1">&#39;(target=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, feature_name=&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span> <span class="o">+</span> <span class="s1">&#39;, error_curve=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_curve</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;(target=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;, feature_name=&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_name</span> <span class="o">+</span> <span class="s1">&#39;, error_curve=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_curve</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
     
     <span class="c1"># For serialization via Pickle</span>
     <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -345,7 +338,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>   
     <span class="c1"># The constructor takes in fields that are common to all targets: the data container + prediction times</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">prediction_times</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">GeneralisationPerformanceEvaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeneralisationPerformanceEvaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prediction_times</span> <span class="o">=</span> <span class="n">prediction_times</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>
@@ -799,7 +792,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2018, Ahmed Guecioueur.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.5.
     </div>
   </body>
 </html>
