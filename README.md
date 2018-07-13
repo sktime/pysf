@@ -6,7 +6,8 @@ Supervised forecasting of sequential data in Python.
 
 ## Documentation
 
-API documentation is [hosted on GitHub Pages](https://ahmedgc.github.io/pysf).
+* This repository contains a [demonstration Jupyter notebook](demos/Walkthrough.ipynb).
+* API documentation is [hosted on GitHub Pages](https://ahmedgc.github.io/pysf).
 
 ## Copyright and license
 
