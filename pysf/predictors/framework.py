@@ -139,6 +139,22 @@ class AbstractPredictor(ABC, LoggingHandler):
         if (len(times.shape) != 1):
             raise Exception('Expected the times parameter to be a 1D array but instead it had shape ' + str(times.shape))
 
+    def _checkAndCompleteInputNonTimeFeatures(self, input_non_time_features, prediction_features):
+        # As well as any specifically-named features (if any) it should include the prediction features, in a union.
+        if input_non_time_features is None:
+            input_non_time_features = []
+        elif type(input_non_time_features) == str:
+            input_non_time_features = [input_non_time_features]
+        
+        # It would be more efficient to do this by union'ing set operations, but operations like this should be deterministic in general:
+        for p in prediction_features:
+            if p not in input_non_time_features:
+                input_non_time_features.append(p)
+        
+        self.debug('Determined input_non_time_features = ' + str(input_non_time_features))
+        return input_non_time_features
+
+            
     # X must be a MultiSeries
     def fit(self, X, prediction_times, input_time_feature=True, input_non_time_features=None, prediction_features=None):
         """Class methods are similar to regular functions.
@@ -469,42 +485,7 @@ class SingleCurveSeriesPredictor(AbstractPredictor):
     def __repr__(self):
         return (self.__class__.__name__ + '(_classic_estimator = ' + str(self._classic_estimator) + ', allow_missing_values = ' + str(self._allow_missing_values) + ')')
     
-        
-        
-class AbstractMultiCurvePredictor(AbstractPredictor):
-    """The summary line for a class docstring should fit on one line.
-
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
-
-    Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
-
-    """       
-    def __init__(self):
-        super(AbstractMultiCurvePredictor, self).__init__()
-        
-    def _checkAndCompleteInputNonTimeFeatures(self, input_non_time_features, prediction_features):
-        # As well as any specifically-named features (if any) it should include the prediction features, in a union.
-        if input_non_time_features is None:
-            input_non_time_features = []
-        elif type(input_non_time_features) == str:
-            input_non_time_features = [input_non_time_features]
-        
-        # It would be more efficient to do this by union'ing set operations, but operations like this should be deterministic in general:
-        for p in prediction_features:
-            if p not in input_non_time_features:
-                input_non_time_features.append(p)
-        
-        self.debug('Determined input_non_time_features = ' + str(input_non_time_features))
-        return input_non_time_features
-        
+                
    
         
 class AbstractWindowedPredictor(AbstractPredictor):
@@ -586,7 +567,7 @@ class AbstractWindowedPredictor(AbstractPredictor):
         
     
 # This works only with SKLearn Estimators conforming to the usual fit/predict pattern at the moment. 
-class MultiCurveTabularPredictor(AbstractMultiCurvePredictor):
+class MultiCurveTabularPredictor(AbstractPredictor):
     """The summary line for a class docstring should fit on one line.
 
     If the class has public attributes, they may be documented here
@@ -683,7 +664,7 @@ class MultiCurveTabularPredictor(AbstractMultiCurvePredictor):
         return (self.__class__.__name__ + '(_classic_estimator = ' + str(self._classic_estimator) + ', allow_missing_values = ' + str(self._allow_missing_values) + ')')
     
 
-class MultiCurveTabularWindowedPredictor(AbstractMultiCurvePredictor, AbstractWindowedPredictor):
+class MultiCurveTabularWindowedPredictor(AbstractWindowedPredictor):
     """The summary line for a class docstring should fit on one line.
 
     If the class has public attributes, they may be documented here
@@ -844,7 +825,7 @@ class MultiCurveTabularWindowedPredictor(AbstractMultiCurvePredictor, AbstractWi
 
         
         
-class SingleCurveTabularWindowedPredictor(AbstractMultiCurvePredictor, AbstractWindowedPredictor):
+class SingleCurveTabularWindowedPredictor(AbstractWindowedPredictor):
     """The summary line for a class docstring should fit on one line.
 
     If the class has public attributes, they may be documented here
