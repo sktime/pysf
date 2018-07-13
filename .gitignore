@@ -3,3 +3,5 @@ pysf.egg-info/*
 *.log
 *.out
 __pycache__
+
+examples/.ipynb_checkpoints/Walkthrough-checkpoint.ipynb
