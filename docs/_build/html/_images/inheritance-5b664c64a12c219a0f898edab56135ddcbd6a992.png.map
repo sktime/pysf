@@ -1,0 +1,17 @@
+<map id="inheritancee24b454881" name="inheritancee24b454881">
+<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="1257,5,1331,29"/>
+<area shape="rect" id="node9" href="index.html#pysf.predictors.framework.AbstractPredictor" target="_top" title="The summary line for a class docstring should fit on one line." alt="" coords="1230,77,1510,101"/>
+<area shape="rect" id="node2" title="The summary line for a class docstring should fit on one line." alt="" coords="1356,5,1539,29"/>
+<area shape="rect" id="node3" title="The summary line for a class docstring should fit on one line." alt="" coords="281,221,595,245"/>
+<area shape="rect" id="node4" title="The summary line for a class docstring should fit on one line." alt="" coords="268,149,609,173"/>
+<area shape="rect" id="node5" title="The summary line for a class docstring should fit on one line." alt="" coords="5,221,258,245"/>
+<area shape="rect" id="node6" title="The summary line for a class docstring should fit on one line." alt="" coords="432,293,786,317"/>
+<area shape="rect" id="node7" title="The summary line for a class docstring should fit on one line." alt="" coords="620,221,958,245"/>
+<area shape="rect" id="node13" title="The summary line for a class docstring should fit on one line." alt="" coords="810,293,1131,317"/>
+<area shape="rect" id="node8" title="The summary line for a class docstring should fit on one line." alt="" coords="832,149,1175,173"/>
+<area shape="rect" id="node11" title="The summary line for a class docstring should fit on one line." alt="" coords="1417,221,1817,245"/>
+<area shape="rect" id="node12" title="The summary line for a class docstring should fit on one line." alt="" coords="983,221,1392,245"/>
+<area shape="rect" id="node10" title="The summary line for a class docstring should fit on one line." alt="" coords="1199,149,1541,173"/>
+<area shape="rect" id="node14" href="index.html#pysf.predictors.tuning.TuningOverallPredictor" target="_top" title="The summary line for a class docstring should fit on one line." alt="" coords="1565,149,1853,173"/>
+<area shape="rect" id="node15" href="index.html#pysf.predictors.tuning.TuningTimestampMultiplexerPredictor" target="_top" title="The summary line for a class docstring should fit on one line." alt="" coords="1877,149,2253,173"/>
+</map>

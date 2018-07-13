@@ -34,7 +34,7 @@ print("Running in Python working directory " + os.getcwd())
 backup_cwd = os.getcwd()
 
 os.chdir('..')
-print("Nowunning in Python working directory " + os.getcwd())
+print("Now running in Python working directory " + os.getcwd())
 
 import pysf
 print("Imported pysf from " + pysf.__file__)
@@ -54,7 +54,18 @@ print("Now running in Python working directory " + os.getcwd())
 extensions = ['sphinx.ext.autodoc',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages']
+    'sphinx.ext.githubpages',
+    'sphinx.ext.inheritance_diagram']
+
+# Define the location of the graphviz "dot" application, which is required by sphinx.ext.inheritance_diagram above
+# TODO: different versions for Windows / Mac...
+#graphviz_dot = 'C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe'
+#graphviz_dot = ('dot', 'C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe')[platform.system() == 'Windows']
+	
+# https://stackoverflow.com/questions/2151711/how-can-i-make-sphinxs-inheritance-diagram-readable
+inheritance_graph_attrs = dict(rankdir="TB", size='""')
+
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
