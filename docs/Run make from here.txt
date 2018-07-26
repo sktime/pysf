@@ -1,0 +1,4 @@
+Run Sphinx build commands such as
+	make html
+from within this directory, and not a level up.
+
