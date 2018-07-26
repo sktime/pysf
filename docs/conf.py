@@ -65,7 +65,8 @@ extensions = ['sphinx.ext.autodoc',
 #graphviz_dot = ('dot', 'C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe')[platform.system() == 'Windows']
 	
 # https://stackoverflow.com/questions/2151711/how-can-i-make-sphinxs-inheritance-diagram-readable
-inheritance_graph_attrs = dict(rankdir="TB", size='""')
+inheritance_graph_attrs = dict(size='""')
+# inheritance_graph_attrs = dict(rankdir="TB", size='""')
 
 
 
