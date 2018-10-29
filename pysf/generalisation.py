@@ -84,20 +84,9 @@ def combine_evaluators(list_of_input_tupes):
     
     
 class Target(LoggingHandler):
-    """The summary line for a class docstring should fit on one line.
-
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
-
-    Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
-
+    """Mapping between the features that are to be input into a particular prediction strategy, and the features that should be output (predicted) by that strategy.
+    
+    Taken together, the input features, output features, and predictor template constitute a prediction strategy.
     """    
     def __init__(self, data, predictor_template, input_time_column, input_value_colnames, output_value_colnames, description = None):
         super(Target, self).__init__()
@@ -167,19 +156,9 @@ class Target(LoggingHandler):
         
 
 class GeneralisationPerformance(LoggingHandler):
-    """The summary line for a class docstring should fit on one line.
+    """Holds the results of estimating a predictor's overall generalisation error across multiple folds.
 
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
-
-    Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
+    Provides methods that expose the overall and per-timestamp generalisation error estimates.
 
     """       
     def __init__(self, target, feature_name, error_curve):
@@ -198,14 +177,10 @@ class GeneralisationPerformance(LoggingHandler):
         
         
     def get_overall_metrics_df(self):
-        """Class methods are similar to regular functions.
-
-        Args:
-            param1: The first parameter.
-            param2: The second parameter.
+        """Exposes the overall (i.e. aggregated across all timestamps) estimates of the generalisation error.
 
         Returns:
-            True if successful, False otherwise.
+            A copy of the results as a pandas dataframe.
 
         """
         df = self.error_curve.get_overall_metrics_as_dataframe()
@@ -219,14 +194,14 @@ class GeneralisationPerformance(LoggingHandler):
         
         
     def get_per_timestamp_metrics_df(self):
-        """Class methods are similar to regular functions.
+        """Exposes the per-timestamp estimates of the generalisation error.
 
         Args:
             param1: The first parameter.
             param2: The second parameter.
 
         Returns:
-            True if successful, False otherwise.
+            A copy of the results as a pandas dataframe.
 
         """
         df = self.error_curve.get_per_timestamp_metrics_as_dataframe()
@@ -261,23 +236,19 @@ class GeneralisationPerformance(LoggingHandler):
         
         
 class GeneralisationPerformanceEvaluator(LoggingHandler):
-    """The summary line for a class docstring should fit on one line.
+    """Estimates the generalisation errors of multiple configured prediction strategies on the same dataset, for the same prediction timestamps, and on the exact same cross-validated splits.
 
-    If the class has public attributes, they may be documented here
-    in an ``Attributes`` section and follow the same formatting as a
-    function's ``Args`` section. Alternatively, attributes may be documented
-    inline with the attribute's declaration (see __init__ method below).
-
-    Properties created with the ``@property`` decorator should be documented
-    in the property's getter method.
-
-    Attributes:
-        attr1 (str): Description of `attr1`.
-        attr2 (:obj:`int`, optional): Description of `attr2`.
-
+    The steps to take are: initialise this object with the common dataset and prediction times, then call `add_to_targets` to configure the prediction strategies to be used. Finally, call `evaluate`, which will conduct the (long-running) evaluation procedure, which will return some results upon completion. Results are also cached internally, and can be retrieved or charted using the helper functions.
     """   
     # The constructor takes in fields that are common to all targets: the data container + prediction times
     def __init__(self, data, prediction_times):
+        """Constructor.
+
+        Args:
+            data: The common `MultiSeries` data container.
+            prediction_times: The common collection of prediction times.
+
+        """   
         super(GeneralisationPerformanceEvaluator, self).__init__()
         self.data = data
         self.prediction_times = prediction_times
@@ -286,14 +257,17 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
         
     # You can call this method multiple times to build up a collection of targets, before evaluating them
     def add_to_targets(self, predictor_templates, combos_of_input_time_column, combos_of_input_value_colnames, combos_of_output_value_colnames):  
-        """Class methods are similar to regular functions.
+        """Expand the arguments (using a Cartesian join) into a collection of `Target` objects, and cache those `Target` objects, ready to be used for the `evaluate` function. 
+        
+        The method can be called multiple times: when that happens, it will append to the collection of targets, overwrite it.
 
+        This is really just a shorthand way of initialising multiple `Target` objects and adding them to the `targets` attribute of this object.
+        
         Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
+            predictor_templates: A list of predictors that should be Cartesian-joined with the other lists of parameters to define multiple targets for evaluation.
+            combos_of_input_time_column: A list of boolean values that should be Cartesian-joined with the other lists of parameters to define multiple targets for evaluation.
+            combos_of_input_value_colnames: A list of string field names that should be Cartesian-joined with the other lists of parameters to define multiple targets for evaluation.
+            combos_of_output_value_colnames: A list of string field names that should be Cartesian-joined with the other lists of parameters to define multiple targets for evaluation.
 
         """                  
         # Validation
@@ -314,14 +288,14 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
                     
     
     def evaluate(self, series_splitter=None, chart_intermediate_results=False):
-        """Class methods are similar to regular functions.
+        """Run the evaluation. Unless a specific `series_splitter` override is provided, this will be a 5-fold cross validation. Depending on the size of the dataset, time to train predictors, number of targets and number of folds, this may take a long time!
 
         Args:
-            param1: The first parameter.
-            param2: The second parameter.
+            series_splitter: If supplied by the user, this object be used instead of `sklearn.model_selection.KFold(n_splits=5)` to produce the folds used for the generalisation error estimation procedure.
+            chart_intermediate_results: If set to True by the user, this method will produce charts after each fold.
 
         Returns:
-            True if successful, False otherwise.
+            A pandas dataframe containing overall (i.e. aggregated over timestamps) estimated generalisation errors.
 
         """
         try:
@@ -396,15 +370,7 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
             raise ex1 # propagate
         
     def calculate_second_pass(self):
-        """Class methods are similar to regular functions.
-
-        Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
-
+        """This is an internal method used by the `evaluate` function.
         """
         generalisation_performances = []
         for key in self.dict_target_and_feature_name_to_list_of_intermediate_scoring_results:
@@ -425,14 +391,14 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
              
         
     def get_sorted_overall_results(self, feature_name, metric = 'rmse'):
-        """Class methods are similar to regular functions.
+        """TODO
 
         Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
+            feature_name: Name of the output/prediction feature that we would like to see the performance on.
+            metric: Type of error metric that we would like to chart; 'rmse' by default.
+            
         Returns:
-            True if successful, False otherwise.
+            A pandas dataframe containing a copy of the results.
 
         """
         df = self.generalisation_metrics_overall_df.copy()
@@ -444,14 +410,15 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
         
         
     def get_best_n_overall_results(self, feature_name, best_n_results, metric = 'rmse'):
-        """Class methods are similar to regular functions.
+        """TODO
 
         Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
+            feature_name: Name of the output/prediction feature that we would like to see the performance on.
+            metric: Type of error metric that we would like to chart; 'rmse' by default.
+            best_n_results: If an integer is supplied, only the results of the `best_n_results` top-performing prediction strategies will be charted; otherwise all will be charted (by default).
+            
         Returns:
-            True if successful, False otherwise.
+            A pandas dataframe containing a copy of the results.
 
         """
         df = self.get_sorted_overall_results(feature_name=feature_name, metric=metric)
@@ -461,15 +428,15 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
         
         
     def chart_overall_performance(self, feature_name, metric = 'rmse', best_n_results = None, stderr_bar_multiple = 1, figsize=None, func_update_description_strings=None, color_non_baseline='C0', color_baseline='C3', baseline_regular_expression='Baseline'):
-        """Class methods are similar to regular functions.
+        """TODO
 
         Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
-
+            feature_name: Name of the output/prediction feature that we would like to see the performance on.
+            metric: Type of error metric that we would like to chart; 'rmse' by default.
+            best_n_results: If an integer is supplied, only the results of the `best_n_results` top-performing prediction strategies will be charted; otherwise all will be charted (by default).
+            stderr_bar_multiple: Error bars will be drawn for the given multiple of standard error (1 by default).
+            errorevery: If a value is supplied, deterministically sample the error bars, displaying each `errorevery` error bar. This does not affect the number of points displayed, just the number of error bars.
+            func_update_description_strings: If a function name is specified, this function will be called on each feature name and the results used in the display. By default, none is supplied.
         """
         if best_n_results is None:
             title='Showing all results'
@@ -509,15 +476,15 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
         
         
     def chart_per_timestamp_performance(self, feature_name, metric = 'rmse', best_n_overall_results = None, stderr_bar_multiple = 1, errorevery=1, func_update_description_strings=None):
-        """Class methods are similar to regular functions.
+        """TODO
 
         Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
-
+            feature_name: Name of the output/prediction feature that we would like to see the performance on.
+            metric: Type of error metric that we would like to chart; 'rmse' by default.
+            best_n_overall_results: If an integer is supplied, only the results of the `best_n_overall_results` top-performing prediction strategies will be charted; otherwise all will be charted (by default).
+            stderr_bar_multiple: Error bars will be drawn for the given multiple of standard error (1 by default).
+            errorevery: If a value is supplied, deterministically sample the error bars, displaying each `errorevery` error bar. This does not affect the number of points displayed, just the number of error bars.
+            func_update_description_strings: If a function name is specified, this function will be called on each feature name and the results used in the display. By default, none is supplied.
         """
         title='Showing all results'
         if best_n_overall_results is None:
@@ -558,15 +525,16 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
         ax.legend(bbox_to_anchor=(0, 0, 1.7, 1), loc='right', prop={'size':8}) 
         ax.set_ylabel(metric + ' +/- ' + str(stderr_bar_multiple) + ' S.E')
         
+
     def get_intermediate_scoring_results(self, tgt_friendly_key, scoring_feature_name):
-        """Class methods are similar to regular functions.
+        """TODO
 
         Args:
             param1: The first parameter.
             param2: The second parameter.
 
         Returns:
-            True if successful, False otherwise.
+            A list (with the same length as the number of folds) containing fold-specific results.
 
         """
         scoring_tgt_features = list(self.dict_target_and_feature_name_to_list_of_intermediate_scoring_results.keys())
@@ -582,15 +550,16 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
             self.warning('No matching set of intermediate scoring results found')
         return res
         
+        
     def get_intermediate_tuning_metrics(self, tgt_friendly_key):
-        """Class methods are similar to regular functions.
+        """TODO
 
         Args:
             param1: The first parameter.
             param2: The second parameter.
 
         Returns:
-            True if successful, False otherwise.
+            A list (with the same length as the number of folds) containing fold-specific results.
 
         """
         tuning_tgts = list(self.dict_target_to_list_of_tuning_metrics.keys())
@@ -605,15 +574,16 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
             self.warning('No matching set of intermediate tuning metrics found')
         return res
     
+
     def get_friendly_tgts_keys(self):
-        """Class methods are similar to regular functions.
+        """TODO
 
         Args:
             param1: The first parameter.
             param2: The second parameter.
 
         Returns:
-            True if successful, False otherwise.
+            A tuple of lists of available keys for intermediate scoring results and intermediate tuning metrics.
 
         """
         set_for_scoring_results = set([ tgt.get_friendly_key() for (tgt, scoring_field) in self.dict_target_and_feature_name_to_list_of_intermediate_scoring_results ])
@@ -622,16 +592,12 @@ class GeneralisationPerformanceEvaluator(LoggingHandler):
         sorted_list_for_tuning_metrics = sorted(set_for_tuning_metrics)
         return (sorted_list_for_scoring_results, sorted_list_for_tuning_metrics)        
         
+    
     def to_csv(self, parent_dirpath):
-        """Class methods are similar to regular functions.
+        """Write out top-level and intermediate results as CSV files, under a fixed directory structure.
 
         Args:
-            param1: The first parameter.
-            param2: The second parameter.
-
-        Returns:
-            True if successful, False otherwise.
-
+            parent_dirpath: Path to the directory in which multiple subdirectories and CSV files will be created. If this parent directory does not exist, it will be created.
         """
         evaluator=self
         
