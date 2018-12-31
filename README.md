@@ -11,4 +11,4 @@ Supervised forecasting of sequential data in Python.
 
 ## Copyright and license
 
-Code and documentation copyright 2018 [Ahmed Guecioueur](https://www.ahmedgc.com). Code released under the MIT License. 
+Code and documentation copyright 2018 [Ahmed Guecioueur](https://www.ahmedgc.com). Code released under the BSD-3-Clause License. 
