@@ -1,10 +1,19 @@
 
 
 ![pysf](https://github.com/alan-turing-institute/pysf/raw/master/docs/_static/logo.png)
+<p align="center">
+  <a href="https://badge.fury.io/py/skpro"><img src="https://badge.fury.io/py/pysf.svg" alt="pysf version" height="18"></a>
+  <a href="https://opensource.org/licenses/BSD-3-Clause"><img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" alt="License"></a>
+</p>
 
-Supervised forecasting of sequential data in Python.
 
-# Key features
+*Supervised forecasting of sequential data in Python.*
+
+## Intro
+
+_Supervised forecasting_ is the machine learning task of making predictions for sequential data like time series (_forecasting_) by exploiting independent examples of the same underlying relationship (_supervised learning_). Learning is flexible enough to incorporate metadata as well as sequential data.
+
+## Key features
 
 * Store and safely manipulate multi-series data in a custom data container.
 * Define your own machine learning prediction strategies to operate on multi-series data. Make use of tuning and pipelining objects to build composite prediction strategies.
@@ -12,14 +21,14 @@ Supervised forecasting of sequential data in Python.
 * Empirically estimate and compare predictors' generalisation performance using nested resampling schemes, in a statistically sound manner.
 
 
-# Getting started
+## Getting started
 
-## Documentation
+### Documentation
 
 * Have a look at the [demonstration Jupyter notebook](examples/Walkthrough.ipynb) for a tutorial.
 * API documentation is [hosted on GitHub Pages](https://alan-turing-institute.github.io/pysf).
 
-## Installation
+### Installation
 
 You can install pysf using the [pip](https://pypi.org/project/pysf/) package management system. If you have pip installed, simply run
 ```
@@ -29,7 +38,7 @@ to install the latest release of pysf.
 
 In addition to the package, you will need the following prerequisites to take advantage of pysf's full functionality.
 
-## Prerequisites:
+### Prerequisites:
 
 * [pandas](https://pandas.pydata.org/pandas-docs/stable/install.html) 0.20 or higher
 * [keras](https://keras.io/#installation) 2.0 or higher
@@ -47,12 +56,12 @@ To use keras for deep learning:
 * Make sure you [install](https://keras.io/#installation) keras and at least one backend engine. pysf has been tested against TensorFlow and Theano as backends. 
 * If using TensorFlow as a backend, you will typically need to install [dask](http://docs.dask.org/en/latest/install.html) 0.15 or higher.
 
-# Credit
+## Contributions
 
-## How to cite
+### How to cite
 
 Coming soon!
 
-## Copyright and license
+### Copyright and license
 
 Code and documentation copyright 2018 [Ahmed Guecioueur](https://www.ahmedgc.com). Code released under the BSD-3-Clause License. 
