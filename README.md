@@ -15,7 +15,7 @@ _Supervised forecasting_ is the machine learning task of making predictions for 
 
 * Store and safely manipulate multi-series data and its metadata in a custom data container.
 * Define your own machine learning prediction strategies to operate on this data. Make use of tuning and pipelining objects to build composite prediction strategies. Use the widely-adopted fit/predict workflow throughout.
-* Plug in existing single-curve predictors into a framework that adapts them to the multi-series setting. Interface with popular single-series machine learning & forecasting frameworks, such as [scikit-learn](https://scikit-learn.org/stable/), [keras](https://keras.io/) and [statsmodels](https://www.statsmodels.org/stable/index.html). 
+* Plug in classical forecasting or supervised learning-based predictors into a framework that adapts them to the supervised forecasting task. Interface with popular machine learning & forecasting frameworks, such as [scikit-learn](https://scikit-learn.org/stable/), [keras](https://keras.io/) and [statsmodels](https://www.statsmodels.org/stable/index.html). 
 * Empirically estimate multiple predictors' generalisation performance using nested resampling schemes, in a statistically sound manner. Compare predictors to baselines.
 
 
@@ -24,7 +24,7 @@ _Supervised forecasting_ is the machine learning task of making predictions for 
 ### Documentation
 
 * Have a look at the [demonstration Jupyter notebook](examples/Walkthrough.ipynb) for a tutorial.
-* API documentation is [hosted on GitHub Pages](https://alan-turing-institute.github.io/pysf).
+* [API documentation](https://alan-turing-institute.github.io/pysf) is hosted on GitHub Pages.
 
 ### Installation
 
@@ -60,6 +60,18 @@ To use keras for deep learning:
 
 Coming soon!
 
+### How to contribute
+
+We welcome contributions! 
+
+* You can suggest new features or report bugs by creating a [new issue](https://github.com/alan-turing-institute/pysf/issues/new). Please check the [list of issues](https://github.com/alan-turing-institute/pysf/issues) first.
+* If you have made a change for an open issue, please submit a pull request linking to that issue.
+* If you would like to improve the documentation, please go right ahead and submit a pull request.
+
+### Contributors
+
+* Ahmed Guecioueur [`@ahmedgc <https://github.com/ahmedgc>`_] is the original author of this package.
+
 ### Copyright and license
 
-Code and documentation copyright 2018 [Ahmed Guecioueur](https://www.ahmedgc.com). Code released under the BSD-3-Clause License. 
+Code and documentation copyright 2018 [Ahmed Guecioueur](https://github.com/ahmedgc). Code released under the BSD-3-Clause License. 
