@@ -13,8 +13,8 @@ _Supervised forecasting_ is the machine learning task of making predictions for 
 
 ## Package features
 
-* Store and safely manipulate multi-series data in a custom data container.
-* Define your own machine learning prediction strategies to operate on multi-series data. Make use of tuning and pipelining objects to build composite prediction strategies.
+* Store and safely manipulate multi-series data and its metadata in a custom data container.
+* Define your own machine learning prediction strategies to operate on this data. Make use of tuning and pipelining objects to build composite prediction strategies. Use the widely-adopted fit/predict workflow throughout.
 * Plug in existing single-curve predictors into a framework that adapts them to the multi-series setting. Interface with popular single-series machine learning & forecasting frameworks, such as [scikit-learn](https://scikit-learn.org/stable/), [keras](https://keras.io/) and [statsmodels](https://www.statsmodels.org/stable/index.html). 
 * Empirically estimate multiple predictors' generalisation performance using nested resampling schemes, in a statistically sound manner. Compare predictors to baselines.
 
