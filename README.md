@@ -70,7 +70,7 @@ We welcome contributions!
 
 ### Contributors
 
-* Ahmed Guecioueur [`@ahmedgc <https://github.com/ahmedgc>`_] is the original author of this package.
+* Ahmed Guecioueur ([@ahmedgc](https://github.com/ahmedgc)) is the original author of this package.
 
 ### Copyright and license
 
