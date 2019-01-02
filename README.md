@@ -1,24 +1,22 @@
-
-
-![pysf](https://github.com/alan-turing-institute/pysf/raw/master/docs/_static/logo.png)
 <p align="center">
-  <a href="https://badge.fury.io/py/skpro"><img src="https://badge.fury.io/py/pysf.svg" alt="pysf version" height="18"></a>
+  <a href="https://badge.fury.io/py/pysf"><img src="https://badge.fury.io/py/pysf.svg" alt="pysf version" height="18"></a>
   <a href="https://opensource.org/licenses/BSD-3-Clause"><img src="https://img.shields.io/badge/License-BSD%203--Clause-blue.svg" alt="License"></a>
 </p>
 
+![pysf](https://github.com/alan-turing-institute/pysf/raw/master/docs/_static/logo.png)
 
-*Supervised forecasting of sequential data in Python.*
+Supervised forecasting of sequential data in Python.
 
 ## Intro
 
 _Supervised forecasting_ is the machine learning task of making predictions for sequential data like time series (_forecasting_) by exploiting independent examples of the same underlying relationship (_supervised learning_). Learning is flexible enough to incorporate metadata as well as sequential data.
 
-## Key features
+## Package features
 
 * Store and safely manipulate multi-series data in a custom data container.
 * Define your own machine learning prediction strategies to operate on multi-series data. Make use of tuning and pipelining objects to build composite prediction strategies.
 * Plug in existing single-curve predictors into a framework that adapts them to the multi-series setting. Interface with popular single-series machine learning & forecasting frameworks, such as [scikit-learn](https://scikit-learn.org/stable/), [keras](https://keras.io/) and [statsmodels](https://www.statsmodels.org/stable/index.html). 
-* Empirically estimate and compare predictors' generalisation performance using nested resampling schemes, in a statistically sound manner.
+* Empirically estimate multiple predictors' generalisation performance using nested resampling schemes, in a statistically sound manner. Compare predictors to baselines.
 
 
 ## Getting started
